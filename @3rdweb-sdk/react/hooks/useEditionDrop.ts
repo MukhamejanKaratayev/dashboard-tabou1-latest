@@ -38,22 +38,6 @@ export function useEditionDropResetClaimEligibilityMutation(
   });
 }
 
-export function useEditionDropActiveClaimCondition(
-  contractAddress?: string,
-  tokenId?: string,
-) {
-  const dropContract = useEditionDrop(contractAddress);
-  return useQueryWithNetwork(
-    editionDropKeys.activeClaimCondition(contractAddress, tokenId),
-    async () => {
-      return await dropContract?.claimConditions.getActive(tokenId as string);
-    },
-    {
-      enabled: !!dropContract && !!contractAddress && tokenId !== undefined,
-    },
-  );
-}
-
 export function useEditionDropBalance(
   contractAddress?: string,
   tokenId?: string,

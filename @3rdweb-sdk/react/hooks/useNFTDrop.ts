@@ -43,19 +43,6 @@ export function useNFTDropSupply(contractAddress?: string) {
   );
 }
 
-export function useNFTDropActiveClaimCondition(contractAddress?: string) {
-  const dropContract = useNFTDrop(contractAddress);
-  return useQueryWithNetwork(
-    NFTDropKeys.activeClaimCondition(contractAddress),
-    async () => {
-      return await dropContract?.claimConditions.getActive();
-    },
-    {
-      enabled: !!dropContract && !!contractAddress,
-    },
-  );
-}
-
 export function useNFTDropBalance(contractAddress?: string) {
   const dropContract = useNFTDrop(contractAddress);
   const { address } = useWeb3();
@@ -147,9 +134,7 @@ export function useNFTDropClaimConditionMutation(contract?: NFTDrop) {
     },
     {
       onSuccess: (_data, _variables, _options, invalidate) => {
-        return invalidate([
-          NFTDropKeys.activeClaimCondition(contract?.getAddress()),
-        ]);
+        return invalidate([]);
       },
     },
   );

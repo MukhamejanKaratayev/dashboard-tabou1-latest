@@ -49,7 +49,7 @@ export default function NFTDropPage() {
 
   const nftDropAddress = useSingleQueryParam("nft-drop");
   const contract = useNFTDrop(nftDropAddress);
-  const claimPhases = useClaimConditions(contract);
+  const claimConditions = useClaimConditions(contract);
   const metadata = useNFTDropContractMetadata(nftDropAddress);
   const batchesToReveal = useBatchesToReveal(nftDropAddress);
 
@@ -143,7 +143,7 @@ export default function NFTDropPage() {
         }}
       >
         <Stack spacing={6}>
-          {!claimPhases?.data?.length && !claimPhases.isLoading && (
+          {!claimConditions?.data?.length && !claimConditions.isLoading && (
             <ContractPageNotice
               color="orange"
               onClick={() =>

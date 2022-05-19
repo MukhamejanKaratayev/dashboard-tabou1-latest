@@ -50,8 +50,6 @@ export const NFTDropKeys = {
     [...NFTDropKeys.details(), address, "batchesToReveal"] as const,
   supply: (address = constants.AddressZero) =>
     [...NFTDropKeys.detail(address), "supply"] as const,
-  activeClaimCondition: (address = constants.AddressZero) =>
-    [...NFTDropKeys.detail(address), "activeClaimCondition"] as const,
   claimPhases: (address = constants.AddressZero) =>
     [...NFTDropKeys.detail(address), "claimPhases"] as const,
   balanceOf: (
@@ -73,12 +71,6 @@ export const editionDropKeys = {
   details: () => [...editionDropKeys.all, "detail"] as const,
   detail: (address = constants.AddressZero) =>
     [...editionDropKeys.details(), address] as const,
-  activeClaimCondition: (address = constants.AddressZero, tokenId = "-1") =>
-    [
-      ...editionDropKeys.detail(address),
-      "activeClaimCondition",
-      { tokenId },
-    ] as const,
   claimPhases: (address = constants.AddressZero, tokenId = "-1") =>
     [...editionDropKeys.detail(address), "claimPhases", { tokenId }] as const,
   owned: (
@@ -187,8 +179,6 @@ export const tokenDropKeys = {
     address: string = constants.AddressZero,
     walletAddress: string = constants.AddressZero,
   ) => [...tokenDropKeys.details(), address, { walletAddress }] as const,
-  activeClaimCondition: (address = constants.AddressZero) =>
-    [...tokenDropKeys.detail(address), "activeClaimCondition"] as const,
   claimPhases: (address = constants.AddressZero) =>
     [...tokenDropKeys.detail(address), "claimPhases"] as const,
   balanceOf: (

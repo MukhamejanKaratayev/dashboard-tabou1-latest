@@ -63,19 +63,6 @@ export function useTokenDropBalance(
   );
 }
 
-export function useTokenDropActiveClaimCondition(contractAddress?: string) {
-  const tokenDropContract = useTokenDrop(contractAddress);
-  return useQueryWithNetwork(
-    tokenDropKeys.activeClaimCondition(contractAddress),
-    async () => {
-      return await tokenDropContract?.claimConditions.getActive();
-    },
-    {
-      enabled: !!tokenDropContract && !!contractAddress,
-    },
-  );
-}
-
 export function useTokenDropResetClaimEligibilityMutation(
   contract?: TokenDrop,
 ) {
@@ -106,9 +93,7 @@ export function useTokenDropClaimConditionMutation(contract?: TokenDrop) {
     },
     {
       onSuccess: (_data, _variables, _options, invalidate) => {
-        return invalidate([
-          tokenDropKeys.activeClaimCondition(contract?.getAddress()),
-        ]);
+        return invalidate([]);
       },
     },
   );
