@@ -1,7 +1,6 @@
 import { SnapshotUpload } from "../../batch-upload/SnapshotUpload";
 import { AdminOnly } from "@3rdweb-sdk/react";
 import {
-  useClaimPhases,
   useClaimPhasesMutation,
   useDecimals,
   useResetEligibilityMutation,
@@ -20,6 +19,7 @@ import {
   Spinner,
   Stack,
 } from "@chakra-ui/react";
+import { useClaimConditions } from "@thirdweb-dev/react";
 import {
   ClaimConditionInput,
   ClaimConditionInputArray,
@@ -135,7 +135,15 @@ const DropPhasesSchema = z.object({
   phases: ClaimConditionInputArray,
 });
 const DropPhasesForm: React.FC<DropPhases> = ({ contract, tokenId }) => {
-  const query = useClaimPhases(contract, tokenId);
+  const query =
+    contract instanceof NFTDrop
+      ? // eslint-disable-next-line react-hooks/rules-of-hooks
+        useClaimConditions(contract)
+      : contract instanceof EditionDrop
+      ? // eslint-disable-next-line react-hooks/rules-of-hooks
+        useClaimConditions(contract, tokenId)
+      : // eslint-disable-next-line react-hooks/rules-of-hooks
+        useClaimConditions(contract);
   const mutation = useClaimPhasesMutation(contract, tokenId);
   const decimals = useDecimals(contract);
 

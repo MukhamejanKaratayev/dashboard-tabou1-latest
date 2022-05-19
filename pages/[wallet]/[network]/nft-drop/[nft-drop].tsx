@@ -4,8 +4,6 @@ import {
   useNFTDropContractMetadata,
   useNFTDropSupply,
 } from "@3rdweb-sdk/react";
-import { useClaimPhases } from "@3rdweb-sdk/react/hooks/useClaimPhases";
-import { useDisclosure } from "@chakra-ui/hooks";
 import {
   Icon,
   Menu,
@@ -16,8 +14,9 @@ import {
   Stat,
   StatLabel,
   StatNumber,
+  useDisclosure,
 } from "@chakra-ui/react";
-import { useNFTDrop } from "@thirdweb-dev/react";
+import { useClaimConditions, useNFTDrop } from "@thirdweb-dev/react";
 import { BatchToReveal } from "@thirdweb-dev/sdk";
 import { AppLayout } from "components/app-layouts/app";
 import { NftDropBatchUpload } from "components/batch-upload/NftDropBatchUpload";
@@ -48,16 +47,16 @@ export default function NFTDropPage() {
   const router = useRouter();
   const [selectedBatch, setSelectedBatch] = useState<BatchToReveal>();
 
-  const dropAddress = useSingleQueryParam("nft-drop");
-  const contract = useNFTDrop(dropAddress);
-  const claimPhases = useClaimPhases(contract);
-  const metadata = useNFTDropContractMetadata(dropAddress);
-  const batchesToReveal = useBatchesToReveal(dropAddress);
+  const nftDropAddress = useSingleQueryParam("nft-drop");
+  const contract = useNFTDrop(nftDropAddress);
+  const claimPhases = useClaimConditions(contract);
+  const metadata = useNFTDropContractMetadata(nftDropAddress);
+  const batchesToReveal = useBatchesToReveal(nftDropAddress);
 
-  const { data: supplyData } = useNFTDropSupply(dropAddress);
+  const { data: supplyData } = useNFTDropSupply(nftDropAddress);
   const { Track } = useTrack({
     page: "drop",
-    drop: dropAddress,
+    drop: nftDropAddress,
   });
 
   return (

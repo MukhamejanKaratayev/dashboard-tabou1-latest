@@ -1,8 +1,5 @@
 import { NFTDropKeys, editionDropKeys, tokenDropKeys } from "../cache-keys";
-import {
-  useMutationWithInvalidate,
-  useQueryWithNetwork,
-} from "./query/useQueryWithNetwork";
+import { useMutationWithInvalidate } from "./query/useQueryWithNetwork";
 import { useEditionDropResetClaimEligibilityMutation } from "./useEditionDrop";
 import { useNFTDropResetClaimEligibilityMutation } from "./useNFTDrop";
 import {
@@ -24,52 +21,6 @@ export function useDecimals(contract?: NFTDrop | EditionDrop | TokenDrop) {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     return useTokenDropData(contract?.getAddress()).data?.decimals;
   }
-}
-
-export function useClaimPhases(
-  contract?: NFTDrop | EditionDrop | TokenDrop,
-  tokenId?: string,
-) {
-  if (contract instanceof NFTDrop) {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useNFTDropClaimPhases(contract);
-  } else if (contract instanceof EditionDrop) {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useEditionDropClaimPhases(contract, tokenId);
-  } else {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useTokenDropClaimPhases(contract);
-  }
-}
-
-function useNFTDropClaimPhases(contract?: NFTDrop) {
-  return useQueryWithNetwork(
-    NFTDropKeys.claimPhases(contract?.getAddress()),
-    async () => await contract?.claimConditions.getAll(),
-    {
-      enabled: !!contract,
-    },
-  );
-}
-
-function useEditionDropClaimPhases(contract?: EditionDrop, tokenId?: string) {
-  return useQueryWithNetwork(
-    editionDropKeys.claimPhases(contract?.getAddress(), tokenId),
-    async () => await contract?.claimConditions.getAll(tokenId as string),
-    {
-      enabled: !!contract && !!tokenId,
-    },
-  );
-}
-
-function useTokenDropClaimPhases(contract?: TokenDrop) {
-  return useQueryWithNetwork(
-    tokenDropKeys.claimPhases(contract?.getAddress()),
-    async () => await contract?.claimConditions.getAll(),
-    {
-      enabled: !!contract,
-    },
-  );
 }
 
 export function useClaimPhasesMutation(
