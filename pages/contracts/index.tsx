@@ -5,12 +5,7 @@ import {
   Box,
   Center,
   Flex,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
+  Link,
   Spinner,
   VStack,
 } from "@chakra-ui/react";
@@ -23,19 +18,7 @@ import { CustomSDKContext } from "contexts/custom-sdk-context";
 import { useTrack } from "hooks/analytics/useTrack";
 import React, { ReactElement, useState } from "react";
 import { IoRefreshSharp } from "react-icons/io5";
-import {
-  Badge,
-  Button,
-  Card,
-  CodeBlock,
-  Heading,
-  LinkButton,
-  Text,
-} from "tw-components";
-
-const DeployUpsell: React.FC = () => {
-  return <>Deploy Upsell</>;
-};
+import { Button, Heading, Text } from "tw-components";
 
 const ContractsHomepageWrapped: React.FC = () => {
   const { Track } = useTrack({
@@ -50,9 +33,9 @@ const ContractsHomepageWrapped: React.FC = () => {
   return (
     <Track>
       <VStack alignItems="flex-end">
-        <Button size="sm" onClick={() => setIsOpen(true)}>
-          Import your contracts
-        </Button>
+        <Link href="/contracts/import">
+          <Button size="sm">Import your contracts</Button>
+        </Link>
       </VStack>
       {!publishedContracts.isSuccess ||
         (publishedContracts.data.length > 0 ? (
@@ -108,8 +91,7 @@ const ContractsHomepageWrapped: React.FC = () => {
         ) : (
           ""
         ))}
-      <Box p={4} />
-      <Flex pb={4} gap={2} direction="column">
+      <Flex mt={4} pb={4} gap={2} direction="column">
         <Heading size="title.md">Pre-built contracts</Heading>
         <Text fontStyle="italic">
           Contracts created by the thirdweb team that you can deploy
@@ -119,21 +101,6 @@ const ContractsHomepageWrapped: React.FC = () => {
         hasDescription
         contractIds={Object.keys(KNOWN_CONTRACTS_MAP)}
       />
-      <Modal isCentered isOpen={isOpen} onClose={() => setIsOpen(false)}>
-        <ModalOverlay />
-        <ModalContent mx={{ base: 4, md: 0 }}>
-          <ModalHeader size="title.md" as={Heading}>
-            Import Contracts
-          </ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <Text fontSize="small">
-              Run this command in your smart contract project to import
-            </Text>
-            <CodeBlock language="javascript" code="npx thirdweb deploy" />
-          </ModalBody>
-        </ModalContent>
-      </Modal>
     </Track>
   );
 };
