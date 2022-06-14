@@ -37,9 +37,9 @@ export const ContractClaimPhasesPage: React.FC<
           <ButtonGroup colorScheme="purple" size="sm" variant="solid">
             <LinkButton
               isExternal
-              href="https://portal.thirdweb.com/thirdweb-deploy/contract-extensions/ClaimPhases"
+              href="https://portal.thirdweb.com/thirdweb-deploy/contract-extensions/"
             >
-              ClaimPhases
+              Claim Phases
             </LinkButton>
           </ButtonGroup>
         </Flex>
