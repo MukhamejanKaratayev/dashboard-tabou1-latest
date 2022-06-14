@@ -50,6 +50,20 @@ export function useContractRouteConfig(
         )),
     },
     {
+      title: "Claim Phases",
+      path: "claim-phases",
+      isEnabled: extensionDetectedState({
+        contract,
+        feature: "ERC721ClaimConditions",
+      }),
+      element: () =>
+        import("../tabs/claim-phases/page").then(
+          ({ ContractClaimPhasesPage }) => (
+            <ContractClaimPhasesPage contractAddress={contractAddress} />
+          ),
+        ),
+    },
+    {
       title: "Permissions",
       path: "permissions",
       isEnabled: extensionDetectedState({ contract, feature: "Permissions" }),
