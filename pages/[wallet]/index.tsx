@@ -238,7 +238,8 @@ export default function Dashboard() {
               <Flex gap={2} direction="column">
                 <Heading size="title.md">Deployed contracts</Heading>
                 <Text fontStyle="italic" maxW="container.md">
-                  The list of contract instances that you have deployed across all networks.
+                  The list of contract instances that you have deployed across
+                  all networks.
                 </Text>
               </Flex>
               <LinkButton
@@ -450,7 +451,7 @@ const LearnMoreSection: React.FC = () => {
           </Flex>
         </Flex>
       </Card> */}
-      
+
       {/* <Card p={6} as={LinkBox} _hover={{ borderColor: "primary.600" }}>
         <Flex flexDir="column" gap={3}>
           <Icon as={AiFillLayout} boxSize={9} />
