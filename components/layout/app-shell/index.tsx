@@ -173,9 +173,9 @@ export const AppShell: ComponentWithChildren = ({ children }) => {
           <Stack>
             <Stack direction="row" spacing="4" align="center" justify="center">
               <Text alignSelf="center">
-                thirdweb &copy; {new Date().getFullYear()}
+                TABOU1 (thirdweb) &copy; {new Date().getFullYear()}
               </Text>
-              <TrackedLink
+              {/* <TrackedLink
                 isExternal
                 href="https://feedback.thirdweb.com"
                 category="footer"
@@ -198,7 +198,7 @@ export const AppShell: ComponentWithChildren = ({ children }) => {
                 label="terms"
               >
                 Terms of Service
-              </TrackedLink>
+              </TrackedLink> */}
             </Stack>
           </Stack>
         </Container>

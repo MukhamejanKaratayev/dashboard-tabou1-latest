@@ -238,8 +238,7 @@ export default function Dashboard() {
               <Flex gap={2} direction="column">
                 <Heading size="title.md">Deployed contracts</Heading>
                 <Text fontStyle="italic" maxW="container.md">
-                  The list of contract instances that you have deployed with
-                  thirdweb across all networks.
+                  The list of contract instances that you have deployed across all networks.
                 </Text>
               </Flex>
               <LinkButton
@@ -282,7 +281,7 @@ const LearnMoreSection: React.FC = () => {
   const { trackEvent } = useTrack();
   return (
     <SimpleGrid columns={{ base: 1, md: 3 }} gap={5}>
-      <Card
+      {/* <Card
         p={6}
         as={LinkBox}
         _hover={{ borderColor: "primary.600" }}
@@ -416,8 +415,9 @@ const LearnMoreSection: React.FC = () => {
             <Text size="body.md">JavaScript, Python, React, Go, etc.</Text>
           </Flex>
         </Flex>
-      </Card>
-      <Card p={6} as={LinkBox} _hover={{ borderColor: "primary.600" }}>
+      </Card> */}
+
+      {/* <Card p={6} as={LinkBox} _hover={{ borderColor: "primary.600" }}>
         <Flex flexDir="column" gap={3}>
           <Icon as={AiFillCode} boxSize={9} />
           <Flex flexDir="column" gap={1}>
@@ -449,8 +449,9 @@ const LearnMoreSection: React.FC = () => {
             <Text size="body.md">Your own contracts, all of our tools.</Text>
           </Flex>
         </Flex>
-      </Card>
-      <Card p={6} as={LinkBox} _hover={{ borderColor: "primary.600" }}>
+      </Card> */}
+      
+      {/* <Card p={6} as={LinkBox} _hover={{ borderColor: "primary.600" }}>
         <Flex flexDir="column" gap={3}>
           <Icon as={AiFillLayout} boxSize={9} />
           <Flex flexDir="column" gap={1}>
@@ -483,7 +484,7 @@ const LearnMoreSection: React.FC = () => {
             <Text size="body.md">Your Solidity quick-start</Text>
           </Flex>
         </Flex>
-      </Card>
+      </Card> */}
     </SimpleGrid>
   );
 };

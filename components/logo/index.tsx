@@ -11,8 +11,15 @@ export const IconLogo: React.FC<Omit<AspectRatioProps, "ratio">> = ({
   ...props
 }) => {
   return (
-    <AspectRatio ratio={516 / 321} {...props}>
-      <svg viewBox="0 0 516 321" fill="none">
+    <AspectRatio ratio={1500 / 400} {...props}>
+      <img
+              src={`/logo.png`}
+              alt="Thirdweb Logo"
+              width={200}
+              style={{ cursor: "pointer" }}
+            />
+
+      {/* <svg viewBox="0 0 516 321" fill="none">
         <g clipPath="url(#clip0_3:35)">
           <path
             d="M1.40497 27.0011C-3.73633 14.022 5.84519 0 19.8669 0H106.919C115.098 0 122.342 4.86715 125.381 12.3996L194.671 185.299C196.541 189.935 196.541 195.149 194.671 199.901L151.087 308.484C144.427 325.056 120.823 325.056 114.163 308.484L1.40497 27.0011Z"
@@ -80,7 +87,7 @@ export const IconLogo: React.FC<Omit<AspectRatioProps, "ratio">> = ({
             <rect width="516" height="321" fill="white" />
           </clipPath>
         </defs>
-      </svg>
+      </svg> */}
     </AspectRatio>
   );
 };
@@ -116,15 +123,15 @@ export const Logo: React.FC<ILogoProps> = ({
 }) => {
   return (
     <Stack as="h2" align="center" direction="row">
-      {hideIcon ?? <IconLogo w={[9, 9, 10]} flexShrink={0} />}
-      {hideWordmark ?? (
+      {hideIcon ?? <IconLogo w={[24, 24, 28]} flexShrink={0} />}
+      {/* {hideWordmark ?? (
         <Wordmark
           display={{ base: "none", md: "block" }}
           color={color}
           w={[24, 24, 28]}
           flexShrink={0}
         />
-      )}
+      )} */}
       <VisuallyHidden>thirdweb</VisuallyHidden>
     </Stack>
   );
