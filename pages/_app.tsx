@@ -77,13 +77,13 @@ function ConsoleApp({ Component, pageProps }: AppPropsWithLayout) {
         `}
       />
       <DefaultSeo
-        defaultTitle="Web3 SDKs for developers ⸱ No-code for NFT artists | thirdweb"
-        titleTemplate="%s | thirdweb"
+        defaultTitle="Tabou1 | Admin Dashboard"
+        titleTemplate="%s | Tabou1"
         description="Build web3 apps easily. Implement web3 features with powerful SDKs for developers. Drop NFTs with no code. — Ethereum, Polygon, Avalanche, & more."
         additionalLinkTags={[
           {
             rel: "icon",
-            href: "/favicon.ico",
+            href: "/favicon.png",
           },
         ]}
         openGraph={{

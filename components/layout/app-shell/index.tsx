@@ -45,7 +45,7 @@ export const AppShell: ComponentWithChildren = ({ children }) => {
       <NextSeo
         title="Dashboard"
         openGraph={{
-          title: "Dashboard | thirdweb",
+          title: "Dashboard | Tabou1",
           url: `https://thirdweb.com/dashboard`,
         }}
       />
