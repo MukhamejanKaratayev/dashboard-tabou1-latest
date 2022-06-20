@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import {
   AspectRatio,
   AspectRatioProps,
@@ -13,11 +14,12 @@ export const IconLogo: React.FC<Omit<AspectRatioProps, "ratio">> = ({
   return (
     <AspectRatio ratio={1500 / 400} {...props}>
       <img
-              src={`/logo.png`}
-              alt="Thirdweb Logo"
-              width={200}
-              style={{ cursor: "pointer" }}
-            />
+        src={`/logo.png`}
+        alt="Thirdweb Logo"
+        width={200}
+        // eslint-disable-next-line react/forbid-dom-props
+        style={{ cursor: "pointer" }}
+      />
 
       {/* <svg viewBox="0 0 516 321" fill="none">
         <g clipPath="url(#clip0_3:35)">
