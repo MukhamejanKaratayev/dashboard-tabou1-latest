@@ -40,80 +40,129 @@ export interface BuiltinContractDetails {
   description: string;
   icon: StaticImageData;
   comingSoon?: boolean;
+  contractType: ContractType;
+  erc?: "ERC721" | "ERC20" | "ERC1155" | "ERC721A";
 }
 
 export const BuiltinContractMap: Record<ContractType, BuiltinContractDetails> =
   {
     "nft-drop": {
       title: "NFT Drop",
-      description: "Claimable drop of one-of-one NFTs",
+      description: "One NFT, one owner",
       icon: FeatureIconMap["nft-drop"],
-    },
-    "nft-collection": {
-      title: "NFT Collection",
-      description: "A collection of one-of-one NFTs",
-      icon: FeatureIconMap["nft-collection"],
+      contractType: "nft-drop",
+      erc: "ERC721",
     },
     marketplace: {
       title: "Marketplace",
-      description: "Your very own marketplace",
+      description: "Marketplace for ERC721/ERC1155 NFTs",
       icon: FeatureIconMap["marketplace"],
-    },
-    token: {
-      title: "Token",
-      description: "Your own ERC20 token",
-      icon: FeatureIconMap["token"],
-    },
-    pack: {
-      title: "Pack",
-      description: "Randomized rewards (loot boxes)",
-      icon: FeatureIconMap["pack"],
-
-      comingSoon: true,
+      contractType: "marketplace",
     },
     split: {
       title: "Split",
-      description: "Fee splitting for your revenue",
+      description: "Fee splitting for your primary sales and royalties",
       icon: FeatureIconMap["split"],
+      contractType: "split",
+    },
+    token: {
+      title: "Token",
+      description: "ERC20 token",
+      icon: FeatureIconMap["token"],
+      contractType: "token",
+      erc: "ERC20",
     },
     "edition-drop": {
       title: "Edition Drop",
-      description: "Claimable drop of N-of-one NFTs",
+      description: "One NFT, multiple owners",
       icon: FeatureIconMap["edition-drop"],
-    },
-    edition: {
-      title: "Edition",
-      description: "A collection of N-of-one NFTs",
-      icon: FeatureIconMap["edition"],
-    },
-    vote: {
-      title: "Vote",
-      description: "On-chain ERC20 based voting",
-      icon: FeatureIconMap["vote"],
+      contractType: "edition-drop",
+      erc: "ERC1155",
     },
     "token-drop": {
       title: "Token Drop",
-      description: "Claimable drop of ERC20 tokens",
+      description: "ERC20 token that you can sell for other tokens",
       icon: FeatureIconMap["token-drop"],
+      contractType: "token-drop",
+      erc: "ERC20",
+    },
+    vote: {
+      title: "Vote",
+      description: "On-chain ERC20-based voting",
+      icon: FeatureIconMap["vote"],
+      contractType: "vote",
+    },
+    "nft-collection": {
+      title: "NFT Collection",
+      description: "ERC721 mintable NFTs",
+      icon: FeatureIconMap["nft-collection"],
+      contractType: "nft-collection",
+      erc: "ERC721",
+    },
+    edition: {
+      title: "Edition",
+      description: "ERC1155 mintable NFTs",
+      icon: FeatureIconMap["edition"],
+      contractType: "edition",
+      erc: "ERC1155",
+    },
+    pack: {
+      title: "Pack",
+      description:
+        "Bundle ERC721/ERC1155/ERC20 into a single token, with lootbox mechanics",
+      icon: FeatureIconMap["pack"],
+      comingSoon: true,
+      contractType: "pack",
+    },
+    multiwrap: {
+      title: "Multiwrap",
+      description:
+        "Bundle multiple ERC721/ERC1155/ERC20 tokens into a single ERC721",
+      icon: FeatureIconMap["token-drop"],
+      comingSoon: true,
+      contractType: "multiwrap",
+    },
+    "signature-drop": {
+      title: "Signature Drop",
+      description:
+        "ERC721A NFTs that other people can claim, with signature verification",
+      icon: FeatureIconMap["nft-drop"],
+      comingSoon: true,
+      contractType: "signature-drop",
+      erc: "ERC721A",
     },
     custom: {
       title: "NOT IMPLEMENTED",
       description: "NOT IMPLEMENTED",
       icon: FeatureIconMap["token-drop"],
-    },
-    "signature-drop": {
-      title: "Signature Drop",
-      description: "Claimable drop with signature verification",
-      icon: FeatureIconMap["token-drop"],
-      comingSoon: true,
-    },
-    multiwrap: {
-      title: "Multiwrap",
-      description: "Bundle Tokens and NFTs together",
-      icon: FeatureIconMap["token-drop"],
-      comingSoon: true,
+      contractType: "custom",
     },
   };
+
+interface ContractDeployMap {
+  drop: BuiltinContractDetails[];
+  token: BuiltinContractDetails[];
+  marketplace: BuiltinContractDetails[];
+  governance: BuiltinContractDetails[];
+}
+
+export const TYPE_CONTRACT_MAP: ContractDeployMap = {
+  drop: [
+    BuiltinContractMap["nft-drop"],
+    BuiltinContractMap["edition-drop"],
+    BuiltinContractMap["token-drop"],
+    BuiltinContractMap["signature-drop"],
+  ],
+  token: [
+    BuiltinContractMap["token"],
+    BuiltinContractMap["nft-collection"],
+    BuiltinContractMap["edition"],
+    BuiltinContractMap["multiwrap"],
+    BuiltinContractMap["pack"],
+  ],
+  marketplace: [BuiltinContractMap["marketplace"]],
+  governance: [BuiltinContractMap["vote"], BuiltinContractMap["split"]],
+};
 
 export interface GasPrice {
   deployContract: number;
