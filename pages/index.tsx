@@ -74,7 +74,7 @@ export default function Home() {
                   size="display.md"
                   textAlign={{ base: "center", md: "left" }}
                 >
-                  Build web3 apps, easily.
+                  TABOU1 Build web3 apps, easily.
                 </Heading>
                 <Heading
                   as="h3"
