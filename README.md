@@ -1,8 +1,10 @@
-# thirdweb.com
+# TABOU1 Admin Dashboard
+This repo contains the full source for TABOU1 Admin Dashboard based on [thirdweb](https://portal.thirdweb.com/).
 
-This repo contains the full source for all of thirdweb.com and the thirdweb dashboard.
+### Demo
+Deployed here [Dashboard](https://dashboard-tabou1-latest.vercel.app/dashboard).
 
-## Building
+## To Deploy locally
 
 ### Install dependencies
 
