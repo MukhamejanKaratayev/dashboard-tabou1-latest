@@ -14,9 +14,12 @@ import {
   SmartContract,
   detectFeatures,
   extractConstructorParamsFromAbi,
+  extractFunctionsFromAbi,
   fetchPreDeployMetadata,
 } from "@thirdweb-dev/sdk";
 import {
+  AbiSchema,
+  ContractInfoSchema,
   ExtraPublishMetadata,
   PublishedContract,
 } from "@thirdweb-dev/sdk/dist/src/schema/contracts/custom";
@@ -26,14 +29,18 @@ import { StaticImageData } from "next/image";
 import { useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import invariant from "tiny-invariant";
+import { z } from "zod";
 
 interface ContractPublishMetadata {
   image: string | StaticImageData;
   name: string;
   description?: string;
-  abi?: unknown;
+  abi?: z.infer<typeof AbiSchema>;
   bytecode?: string;
   deployDisabled?: boolean;
+  info?: z.infer<typeof ContractInfoSchema>;
+  licenses?: string[];
+  compilerMetadata?: Record<string, any>;
 }
 
 export function useContractPublishMetadataFromURI(contractId: ContractId) {
@@ -65,7 +72,11 @@ export function useContractPublishMetadataFromURI(contractId: ContractId) {
       return {
         image: (resolved as any)?.image || FeatureIconMap.custom,
         name: resolved.name,
+        description: resolved.info?.title,
         abi: resolved.abi,
+        info: resolved.info,
+        licenses: resolved.licenses,
+        compilerMetadata: resolved.metadata,
       };
     },
     {
@@ -80,6 +91,10 @@ export function useContractPrePublishMetadata(uri: string, address?: string) {
   return useQuery(
     ["pre-publish-metadata", uri, address],
     async () => {
+      invariant(
+        !isContractIdBuiltInContract(uri),
+        "Skipping publish metadata fetch for built-in contract",
+      );
       invariant(address, "address is not defined");
       // TODO: Make this nicer.
       invariant(uri !== "ipfs://undefined", "uri can't be undefined");
@@ -177,6 +192,30 @@ export function useReleasedContractInfo(contract: PublishedContract) {
       enabled: !!contract,
     },
   );
+}
+
+export function useReleasedContractFunctions(contract: PublishedContract) {
+  const { data: meta } = useContractPublishMetadataFromURI(
+    contract.metadataUri,
+  );
+  return useQuery(
+    ["contract-functions", contract.metadataUri],
+    async () => {
+      invariant(contract, "contract is not defined");
+      invariant(meta, "sdk not provided");
+      invariant(meta.abi, "sdk not provided");
+      return extractFunctionsFromAbi(meta.abi || {}, meta.compilerMetadata);
+    },
+    {
+      enabled: !!contract && !!meta && !!meta.abi,
+    },
+  );
+}
+
+export function useReleasedContractCompilerMetadata(
+  contract: PublishedContract,
+) {
+  return useContractPublishMetadataFromURI(contract.metadataUri);
 }
 
 export function useConstructorParamsFromABI(abi?: any) {
