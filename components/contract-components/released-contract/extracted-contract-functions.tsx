@@ -1,85 +1,86 @@
-import { useReleasedContractFunctions } from "../hooks";
-import { InfoIcon } from "@chakra-ui/icons";
-import { Flex, Icon, Tooltip } from "@chakra-ui/react";
-import { AbiFunction, PublishedContract } from "@thirdweb-dev/sdk";
-import { BiPencil } from "react-icons/bi";
-import { BsEye } from "react-icons/bs";
-import { Badge, Card, Heading, Text } from "tw-components";
-
-interface ExtractedContractFunctionsProps {
-  contractRelease: PublishedContract;
-}
+import { Flex, GridItem, List, ListItem, SimpleGrid } from "@chakra-ui/react";
+import { AbiFunction } from "@thirdweb-dev/sdk";
+import { useState } from "react";
+import { Badge, Button, Card, Heading, Text } from "tw-components";
 
 interface ContractFunctionProps {
-  fn: AbiFunction;
+  fn?: AbiFunction;
 }
 
-const ContractFunction: React.FC<ContractFunctionProps> = ({ fn }) => {
+export const ContractFunction: React.FC<ContractFunctionProps> = ({ fn }) => {
+  if (!fn) {
+    return null;
+  }
   return (
-    <Flex alignItems="center" gap={2}>
-      <Heading size="label.md">{fn.name}</Heading>
+    <Flex direction="column" gap={1.5}>
+      <Flex alignItems="center" gap={2}>
+        <Heading size="subtitle.md">{fn.name}</Heading>
+        {fn.stateMutability === "payable" && (
+          <Badge size="label.sm" variant="subtle" colorScheme="green">
+            Payable
+          </Badge>
+        )}
+      </Flex>
       {fn.comment && (
-        <Tooltip
-          bg="transparent"
-          boxShadow="none"
-          p={0}
-          label={
-            <Card>
-              <Text>{fn.comment}</Text>
-            </Card>
-          }
-        >
-          <Icon as={InfoIcon} color="gray.700" />
-        </Tooltip>
-      )}
-      {fn.stateMutability === "payable" && (
-        <Badge
-          size="label.sm"
-          variant="subtle"
-          rounded={6}
-          px={2}
-          backgroundColor="green.600"
-        >
-          Payable
-        </Badge>
+        <Text size="body.md">
+          {fn.comment
+            .replaceAll(/See \{(.+)\}(\.)?/gm, "")
+            .replaceAll("{", '"')
+            .replaceAll("}", '"')}
+        </Text>
       )}
     </Flex>
   );
 };
 
-export const ExtractedContractFunctions: React.FC<
-  ExtractedContractFunctionsProps
-> = ({ contractRelease }) => {
-  const { data: contractFunctions } =
-    useReleasedContractFunctions(contractRelease);
+interface ContractFunctionsPanelProps {
+  functions: AbiFunction[];
+}
+
+export const ContractFunctionsPanel: React.FC<ContractFunctionsPanelProps> = ({
+  functions,
+}) => {
+  const [selectedFunction, setSelectedFunction] = useState<AbiFunction>(
+    functions[0],
+  );
   return (
-    <Flex gap={4} px={6} pt={2} pb={5}>
-      <Flex flexDir="column" flex="1" gap={3}>
-        <Badge size="label.sm" variant="subtle" rounded={6} p={2}>
-          <Icon as={BiPencil} mr={2} />
-          Actions
-        </Badge>
-        {(contractFunctions || [])
-          .filter(
-            (f) => f.stateMutability !== "view" && f.stateMutability !== "pure",
-          )
-          .map((fn) => (
-            <ContractFunction key={fn.name} fn={fn} />
+    <SimpleGrid columns={12}>
+      <GridItem
+        colSpan={{ base: 12, md: 3 }}
+        borderRightWidth={{ base: "0px", md: "1px" }}
+        borderBottomWidth={{ base: "1px", md: "0px" }}
+        borderColor="borderColor"
+      >
+        <List
+          overflow="auto"
+          h={{ base: "300px", md: "500px" }}
+          pr={{ base: 0, md: 3 }}
+          mb={{ base: 3, md: 0 }}
+        >
+          {functions.map((fn) => (
+            <ListItem key={fn.signature} my={0.5}>
+              <Button
+                fontWeight={
+                  selectedFunction.signature === fn.signature ? 600 : 400
+                }
+                opacity={selectedFunction.signature === fn.signature ? 1 : 0.65}
+                onClick={() => setSelectedFunction(fn)}
+                color="heading"
+                _hover={{ opacity: 1, textDecor: "underline" }}
+                variant="link"
+                fontFamily="mono"
+              >
+                {fn.name}
+              </Button>
+            </ListItem>
           ))}
-      </Flex>
-      <Flex flexDir="column" flex="1" gap={3}>
-        <Badge size="label.sm" variant="subtle" rounded={6} p={2}>
-          <Icon as={BsEye} mr={2} />
-          State
-        </Badge>
-        {(contractFunctions || [])
-          .filter(
-            (f) => f.stateMutability === "view" || f.stateMutability === "pure",
-          )
-          .map((fn) => (
-            <ContractFunction key={fn.signature} fn={fn} />
-          ))}
-      </Flex>
-    </Flex>
+        </List>
+      </GridItem>
+      <GridItem colSpan={{ base: 12, md: 9 }}>
+        <Card ml={{ base: 0, md: 3 }} mt={{ base: 3, md: 0 }} flexGrow={1}>
+          <ContractFunction fn={selectedFunction} />
+        </Card>
+      </GridItem>
+    </SimpleGrid>
   );
 };

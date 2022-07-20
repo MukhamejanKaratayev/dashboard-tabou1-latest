@@ -10,8 +10,10 @@ import {
   useSDK,
 } from "@thirdweb-dev/react";
 import {
+  ChainId,
   ContractType,
   SmartContract,
+  ThirdwebSDK,
   detectFeatures,
   extractConstructorParamsFromAbi,
   extractFunctionsFromAbi,
@@ -26,14 +28,16 @@ import {
   PublishedContract,
 } from "@thirdweb-dev/sdk/dist/src/schema/contracts/custom";
 import { StorageSingleton } from "components/app-layouts/providers";
-import { BuiltinContractMap, FeatureIconMap } from "constants/mappings";
+import { BuiltinContractMap } from "constants/mappings";
+import { ethers } from "ethers";
+import { getAddress } from "ethers/lib/utils";
 import { StaticImageData } from "next/image";
 import { useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import invariant from "tiny-invariant";
 import { z } from "zod";
 
-interface ContractPublishMetadata {
+export interface ContractPublishMetadata {
   image: string | StaticImageData;
   name: string;
   description?: string;
@@ -45,42 +49,56 @@ interface ContractPublishMetadata {
   compilerMetadata?: Record<string, any>;
 }
 
-export function useContractPublishMetadataFromURI(contractId: ContractId) {
+function removeUndefinedFromObject(obj: Record<string, any>) {
+  const newObj: Record<string, any> = {};
+  for (const key in obj) {
+    if (obj[key] !== undefined) {
+      newObj[key] = obj[key];
+    }
+  }
+  return newObj;
+}
+
+export async function fetchContractPublishMetadataFromURI(
+  contractId: ContractId,
+) {
   const contractIdIpfsHash = toContractIdIpfsHash(contractId);
+  if (isContractIdBuiltInContract(contractId)) {
+    const details = BuiltinContractMap[contractIdIpfsHash as ContractType];
+    return {
+      image: details.icon,
+      name: details.title,
+      deployDisabled: details.comingSoon,
+      description: details.description,
+    };
+  }
+  // TODO: Make this nicer.
+  invariant(contractId !== "ipfs://undefined", "uri can't be undefined");
+  const resolved = await fetchPreDeployMetadata(
+    contractIdIpfsHash,
+    StorageSingleton,
+  );
+  if (!resolved) {
+    return {
+      name: "Loading...",
+      image: "custom",
+    };
+  }
+  return {
+    image: (resolved as any)?.image || "custom",
+    name: resolved.name,
+    description: resolved.info?.title || "",
+    abi: resolved.abi,
+    info: removeUndefinedFromObject(resolved.info),
+    licenses: resolved.licenses,
+    compilerMetadata: resolved.metadata,
+  };
+}
+
+export function useContractPublishMetadataFromURI(contractId: ContractId) {
   return useQuery<ContractPublishMetadata>(
     ["publish-metadata", contractId],
-    async () => {
-      if (isContractIdBuiltInContract(contractId)) {
-        const details = BuiltinContractMap[contractIdIpfsHash as ContractType];
-        return {
-          image: details.icon,
-          name: details.title,
-          deployDisabled: details.comingSoon,
-          description: details.description,
-        };
-      }
-      // TODO: Make this nicer.
-      invariant(contractId !== "ipfs://undefined", "uri can't be undefined");
-      const resolved = await fetchPreDeployMetadata(
-        contractIdIpfsHash,
-        StorageSingleton,
-      );
-      if (!resolved) {
-        return {
-          name: "Loading...",
-          image: FeatureIconMap.custom,
-        };
-      }
-      return {
-        image: (resolved as any)?.image || FeatureIconMap.custom,
-        name: resolved.name,
-        description: resolved.info?.title,
-        abi: resolved.abi,
-        info: resolved.info,
-        licenses: resolved.licenses,
-        compilerMetadata: resolved.metadata,
-      };
-    },
+    () => fetchContractPublishMetadataFromURI(contractId),
     {
       enabled: !!contractId,
     },
@@ -110,15 +128,20 @@ export function useContractPrePublishMetadata(uri: string, address?: string) {
   );
 }
 
+export async function fetchReleaserProfile(
+  sdk?: ThirdwebSDK,
+  publisherAddress?: string,
+) {
+  invariant(publisherAddress, "address is not defined");
+  invariant(sdk, "sdk not provided");
+  return await sdk.getPublisher().getPublisherProfile(publisherAddress);
+}
+
 export function useReleaserProfile(publisherAddress?: string) {
   const sdk = useSDK();
   return useQuery(
     ["releaser-profile", publisherAddress],
-    async () => {
-      invariant(publisherAddress, "address is not defined");
-      invariant(sdk, "sdk not provided");
-      return await sdk.getPublisher().getPublisherProfile(publisherAddress);
-    },
+    () => fetchReleaserProfile(sdk, publisherAddress),
     {
       enabled: !!publisherAddress,
     },
@@ -147,15 +170,47 @@ export function useLatestRelease(
 
       return {
         ...latestRelease,
-        version: contractInfo.publishedMetadata.version,
-        name: contractInfo.publishedMetadata.name,
-        description: contractInfo.publishedMetadata.description,
+        version: contractInfo.publishedMetadata.version || "",
+        name: contractInfo.publishedMetadata.name || "",
+        description: contractInfo.publishedMetadata.description || "",
+        releaser: contractInfo.publishedMetadata.publisher || "",
       };
     },
     {
       enabled: !!publisherAddress && !!contractName,
     },
   );
+}
+
+export async function fetchAllVersions(
+  sdk?: ThirdwebSDK,
+  publisherAddress?: string,
+  contractName?: string,
+) {
+  invariant(publisherAddress, "address is not defined");
+  invariant(contractName, "contract name is not defined");
+  invariant(sdk, "sdk not provided");
+  const allVersions = await sdk
+    .getPublisher()
+    .getAllVersions(publisherAddress, contractName);
+
+  const releasedVersions = [];
+
+  for (let i = 0; i < allVersions.length; i++) {
+    const contractInfo = await sdk
+      .getPublisher()
+      .fetchPublishedContractInfo(allVersions[i]);
+
+    releasedVersions.unshift({
+      ...allVersions[i],
+      version: contractInfo.publishedMetadata.version,
+      name: contractInfo.publishedMetadata.name,
+      description: contractInfo.publishedMetadata.description || "",
+      releaser: contractInfo.publishedMetadata.publisher || "",
+    });
+  }
+
+  return releasedVersions;
 }
 
 export function useAllVersions(
@@ -165,68 +220,39 @@ export function useAllVersions(
   const sdk = useSDK();
   return useQuery(
     ["all-releases", publisherAddress, contractName],
-    async () => {
-      invariant(publisherAddress, "address is not defined");
-      invariant(contractName, "contract name is not defined");
-      invariant(sdk, "sdk not provided");
-      const allVersions = await sdk
-        .getPublisher()
-        .getAllVersions(publisherAddress, contractName);
-
-      const releasedVersions = [];
-
-      for (let i = 0; i < allVersions.length; i++) {
-        const contractInfo = await sdk
-          .getPublisher()
-          .fetchPublishedContractInfo(allVersions[i]);
-
-        releasedVersions.unshift({
-          ...allVersions[i],
-          version: contractInfo.publishedMetadata.version,
-          name: contractInfo.publishedMetadata.name,
-          description: contractInfo.publishedMetadata.description,
-        });
-      }
-
-      return releasedVersions;
-    },
+    () => fetchAllVersions(sdk, publisherAddress, contractName),
     {
-      enabled: !!publisherAddress && !!contractName,
+      enabled: !!publisherAddress && !!contractName && !!sdk,
     },
   );
+}
+
+export async function fetchReleasedContractInfo(
+  sdk?: ThirdwebSDK,
+  contract?: PublishedContract,
+) {
+  invariant(contract, "contract is not defined");
+  invariant(sdk, "sdk not provided");
+  return await sdk.getPublisher().fetchPublishedContractInfo(contract);
 }
 
 export function useReleasedContractInfo(contract: PublishedContract) {
   const sdk = useSDK();
   return useQuery(
     ["released-contract", contract],
-    async () => {
-      invariant(contract, "contract is not defined");
-      invariant(sdk, "sdk not provided");
-      return await sdk.getPublisher().fetchPublishedContractInfo(contract);
-    },
+    () => fetchReleasedContractInfo(sdk, contract),
     {
       enabled: !!contract,
     },
   );
 }
-
 export function useReleasedContractFunctions(contract: PublishedContract) {
   const { data: meta } = useContractPublishMetadataFromURI(
     contract.metadataUri,
   );
-  return useQuery(
-    ["contract-functions", contract.metadataUri],
-    async () => {
-      invariant(contract, "contract is not defined");
-      invariant(meta, "sdk not provided");
-      invariant(meta.abi, "sdk not provided");
-      return extractFunctionsFromAbi(meta.abi || {}, meta.compilerMetadata);
-    },
-    {
-      enabled: !!contract && !!meta && !!meta.abi,
-    },
-  );
+  return meta
+    ? extractFunctionsFromAbi(meta.abi as any, meta?.compilerMetadata)
+    : undefined;
 }
 
 export function useReleasedContractCompilerMetadata(
@@ -337,9 +363,11 @@ export function usePublishedContractsQuery(address?: string) {
   return useQuery(
     ["published-contracts", address],
     async () => {
-      return address && sdk
-        ? (await (await sdk.getPublisher()).getAll(address)).filter((c) => c.id)
-        : [];
+      invariant(sdk, "sdk not provided");
+      invariant(address, "address is not defined");
+      return ((await sdk.getPublisher().getAll(address)) || []).filter(
+        (c) => c.id,
+      );
     },
     {
       enabled: !!address && !!sdk,
@@ -376,57 +404,123 @@ export function useContractFeatures(abi?: any) {
 
 const ALWAYS_SUGGESTED = ["ContractMetadata", "Permissions"];
 
-function extractFeatures(
+function extractExtensions(
   input: ReturnType<typeof detectFeatures>,
-  enabledFeatures: FeatureWithEnabled[] = [],
-  suggestedFeatures: FeatureWithEnabled[] = [],
+  enabledExtensions: FeatureWithEnabled[] = [],
+  suggestedExtensions: FeatureWithEnabled[] = [],
   parent = "__ROOT__",
 ) {
   if (!input) {
     return {
-      enabledFeatures,
-      suggestedFeatures,
+      enabledExtensions,
+      suggestedExtensions,
     };
   }
-  for (const featureKey in input) {
-    const feature = input[featureKey];
-    // if feature is enabled, then add it to enabledFeatures
-    if (feature.enabled) {
-      enabledFeatures.push(feature);
+  for (const extensionKey in input) {
+    const extension = input[extensionKey];
+    // if extension is enabled, then add it to enabledFeatures
+    if (extension.enabled) {
+      enabledExtensions.push(extension);
     }
     // otherwise if it is disabled, but it's parent is enabled or suggested, then add it to suggestedFeatures
     else if (
-      enabledFeatures.findIndex((f) => f.name === parent) > -1 ||
-      ALWAYS_SUGGESTED.includes(feature.name)
+      enabledExtensions.findIndex((f) => f.name === parent) > -1 ||
+      ALWAYS_SUGGESTED.includes(extension.name)
     ) {
-      suggestedFeatures.push(feature);
+      suggestedExtensions.push(extension);
     }
     // recurse
-    extractFeatures(
-      feature.features,
-      enabledFeatures,
-      suggestedFeatures,
-      feature.name,
+    extractExtensions(
+      extension.features,
+      enabledExtensions,
+      suggestedExtensions,
+      extension.name,
     );
   }
 
   return {
-    enabledFeatures,
-    suggestedFeatures,
+    enabledExtensions,
+    suggestedExtensions,
   };
 }
 
-export function useContractDetectedFeatures(abi?: any) {
+export function useContractDetectedExtensions(abi?: any) {
   const features = useMemo(() => {
     if (abi) {
-      return extractFeatures(detectFeatures(abi));
+      return extractExtensions(detectFeatures(abi));
     }
     return undefined;
   }, [abi]);
   return features;
 }
 
-export function useContractEnabledFeatures(abi?: any) {
-  const features = useContractDetectedFeatures(abi);
-  return features ? features.enabledFeatures : [];
+export function useContractEnabledExtensions(abi?: any) {
+  const extensions = useContractDetectedExtensions(abi);
+  return extensions ? extensions.enabledExtensions : [];
+}
+
+export async function resolveAddressToEnsName(address: string) {
+  if (address.endsWith(".eth")) {
+    return address;
+  }
+
+  // const provider = new ethers.providers.StaticJsonRpcProvider(
+  //   alchemyUrlMap[ChainId.Mainnet],
+  // );
+
+  // TODO switch this to the static JSONRPC provider...
+  // we cannot do this right now because we need this for server-rendering
+  const provider = new ethers.providers.AlchemyProvider(ChainId.Mainnet);
+  return await provider.lookupAddress(address);
+}
+
+export function useEnsName(address?: string) {
+  return useQuery(
+    ["ens-name", address],
+    () => (address ? resolveAddressToEnsName(address) : null),
+    {
+      enabled: !!address,
+      // 24h
+      cacheTime: 60 * 60 * 24 * 1000,
+      // 1h
+      staleTime: 60 * 60 * 1000,
+    },
+  );
+}
+
+export async function resolvePossibleENSName(walletOrEnsAddress: string) {
+  // not a valid ens name, so we'll just return whatever string was passed in
+  if (!walletOrEnsAddress.endsWith(".eth")) {
+    return walletOrEnsAddress;
+  }
+
+  // const provider = new ethers.providers.StaticJsonRpcProvider(
+  //   alchemyUrlMap[ChainId.Mainnet],
+  // );
+
+  // TODO switch this to the static JSONRPC provider...
+  // we cannot do this right now because we need this for server-rendering
+  const provider = new ethers.providers.AlchemyProvider(ChainId.Mainnet);
+  const address = await provider.resolveName(walletOrEnsAddress);
+
+  try {
+    return address ? getAddress(address) : null;
+  } catch (_error) {
+    return null;
+  }
+}
+
+export function useResolvedEnsName(walletOrEnsAddress?: string) {
+  return useQuery(
+    ["ens-address", walletOrEnsAddress],
+    () =>
+      walletOrEnsAddress ? resolvePossibleENSName(walletOrEnsAddress) : null,
+    {
+      enabled: !!walletOrEnsAddress,
+      // 24h
+      cacheTime: 60 * 60 * 24 * 1000,
+      // 1h
+      staleTime: 60 * 60 * 1000,
+    },
+  );
 }
