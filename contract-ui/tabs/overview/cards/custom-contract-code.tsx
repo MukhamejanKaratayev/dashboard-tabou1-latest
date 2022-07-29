@@ -19,8 +19,8 @@ import {
   SimpleGrid,
   Textarea,
 } from "@chakra-ui/react";
+import { useMutation } from "@tanstack/react-query";
 import {
-  ChainId,
   useActiveChainId,
   useContract,
   useContractFunctions,
@@ -33,7 +33,6 @@ import { BigNumber, utils } from "ethers";
 import { useId, useMemo, useRef, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { FiCode, FiEdit2, FiEye, FiPlay, FiSearch } from "react-icons/fi";
-import { useMutation } from "react-query";
 import {
   Badge,
   Button,
@@ -44,6 +43,7 @@ import {
   Heading,
   Text,
 } from "tw-components";
+import { SupportedChainIdToNetworkMap } from "utils/network";
 
 interface ContentOverviewProps {
   contractAddress?: string;
@@ -182,27 +182,6 @@ export const CustomContractCode: React.FC<ContentOverviewProps> = ({
     </Flex>
   );
 };
-
-function getChainName(chainId: number | undefined) {
-  switch (chainId) {
-    case ChainId.Mainnet:
-      return "mainnet";
-    case ChainId.Rinkeby:
-      return "rinkeby";
-    case ChainId.Goerli:
-      return "goerli";
-    case ChainId.Polygon:
-      return "polygon";
-    case ChainId.Mumbai:
-      return "mumbai";
-    case ChainId.Fantom:
-      return "fantom";
-    case ChainId.Avalanche:
-      return "avalanche";
-    default:
-      return "mainnet";
-  }
-}
 
 function formatResponseData(data: unknown): string {
   if (BigNumber.isBigNumber(data)) {
@@ -363,8 +342,11 @@ const InteractiveAbiFunction: React.FC<InteractiveAbiFunctionProps> = ({
   }, [abiFunction]);
 
   const chainId = useActiveChainId();
-  const chainName = getChainName(chainId);
-  const [codeEnv, setCodeEnv] = useState<Environment>("javascript");
+  const chainName =
+    SupportedChainIdToNetworkMap[
+      chainId as keyof typeof SupportedChainIdToNetworkMap
+    ];
+  const [codeEnv, setCodeEnv] = useState<Environment>("react");
 
   async function contractCall(params: unknown[], value?: BigNumber) {
     if (!abiFunction) {
@@ -437,9 +419,6 @@ const InteractiveAbiFunction: React.FC<InteractiveAbiFunctionProps> = ({
               <Text fontSize="12px" noOfLines={2}>
                 {abiFunction.comment}
               </Text>
-            )}
-            {abiFunction?.signature && (
-              <CodeBlock code={abiFunction?.signature} language="typescript" />
             )}
           </>
         )}

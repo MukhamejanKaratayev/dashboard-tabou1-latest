@@ -8,11 +8,11 @@ import {
 } from "./types";
 import { useContractName, useWeb3 } from "@3rdweb-sdk/react";
 import { Flex, Spinner, Stack } from "@chakra-ui/react";
+import { useQuery } from "@tanstack/react-query";
 import { ValidContractInstance } from "@thirdweb-dev/sdk";
 import { useSingleQueryParam } from "hooks/useQueryParam";
 import { useCallback, useMemo, useState } from "react";
 import { IoDocumentOutline } from "react-icons/io5";
-import { useQuery } from "react-query";
 import { Card, CodeBlock, Heading, LinkButton, Text } from "tw-components";
 import { SupportedNetwork } from "utils/network";
 
@@ -27,7 +27,7 @@ function replaceVariablesInCodeSnippet(
     if (contractAddress) {
       snippet[env] = snippet[env]
         ?.replace(/{{contract_address}}/gm, contractAddress)
-        ?.replace(/{{chainName}}/gm, chainName || "rinkeby")
+        ?.replace(/{{chainName}}/gm, chainName || "goerli")
         .replace(/<YOUR-CONTRACT-ADDRESS>/gm, contractAddress);
     }
 
@@ -64,7 +64,7 @@ export const ContractCode: React.FC<IContractCode> = ({ contract }) => {
   }, [data, contractName]);
 
   const { address } = useWeb3();
-  const [environment, setEnvironment] = useState<Environment>("javascript");
+  const [environment, setEnvironment] = useState<Environment>("react");
   const replaceSnippetVars = useCallback(
     (snip: Partial<Record<Environment, string>>) =>
       replaceVariablesInCodeSnippet(
