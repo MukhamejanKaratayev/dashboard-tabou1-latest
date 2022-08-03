@@ -101,16 +101,6 @@ export default function Dashboard() {
   const router = useRouter();
   const wallet = useSingleQueryParam("wallet") || "dashboard";
   const { address } = useWeb3();
-  const { data: projects, isFetched: projectsIsFetched } = useProjects(
-    wallet === "dashboard" ? address : wallet,
-  );
-
-  // redirect anything that is not a valid address or `/dashboard` to `/dashboard`
-  useEffect(() => {
-    if (!utils.isAddress(wallet) && wallet !== "dashboard") {
-      router.replace("/dashboard");
-    }
-  }, [router, wallet]);
 
   const dashboardAddress = useMemo(() => {
     return wallet === "dashboard"
@@ -119,6 +109,9 @@ export default function Dashboard() {
       ? wallet
       : address;
   }, [address, wallet]);
+
+  const { data: projects, isFetched: projectsIsFetched } =
+    useProjects(dashboardAddress);
 
   const mainnetQuery = useContractList(ChainId.Mainnet, dashboardAddress);
   const rinkebyQuery = useContractList(ChainId.Rinkeby, dashboardAddress);
@@ -284,7 +277,7 @@ export default function Dashboard() {
                 <LinkButton
                   leftIcon={<FiPlus />}
                   colorScheme="primary"
-                  href="/contracts/new"
+                  href="/contracts"
                 >
                   Deploy new contract
                 </LinkButton>
@@ -469,7 +462,7 @@ const LearnMoreSection: React.FC = () => {
           <Icon as={AiFillCode} boxSize={9} />
           <Flex flexDir="column" gap={1}>
             <LinkOverlay
-              href="https://portal.thirdweb.com/thirdweb-cli"
+              href="https://portal.thirdweb.com/deploy"
               isExternal
               onClick={() =>
                 trackEvent({
@@ -752,29 +745,18 @@ export const ContractTable: React.FC<ContractTableProps> = ({
     [],
   );
 
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    rows,
-    prepareRow,
-    // state,
-    // visibleColumns,
-    // preGlobalFilteredRows,
-    // setGlobalFilter,
-  } = useTable(
-    {
-      columns,
-      data: combinedList,
-      defaultColumn,
-    },
-    useFilters,
-    useGlobalFilter,
-  );
+  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
+    useTable(
+      {
+        columns,
+        data: combinedList,
+        defaultColumn,
+      },
+      useFilters,
+      useGlobalFilter,
+    );
 
   const router = useRouter();
-
-  const wallet = useSingleQueryParam("wallet") || "dashboard";
 
   return (
     <Box w="100%" overflowX="auto">
@@ -826,7 +808,7 @@ export const ContractTable: React.FC<ContractTableProps> = ({
                       ? ""
                       : `/${UrlMap[row.original.contractType]}`;
 
-                  const href = `/${wallet}/${getNetworkFromChainId(
+                  const href = `/${getNetworkFromChainId(
                     row.original.chainId as SUPPORTED_CHAIN_ID,
                   )}${contractTypeUrlSegment}/${row.original.address}`;
 
@@ -863,7 +845,6 @@ interface AsyncContractCellProps {
 }
 
 const AsyncContractCell: React.FC<AsyncContractCellProps> = ({ cell }) => {
-  const wallet = useSingleQueryParam("wallet") || "dashboard";
   const metadataQuery = useContractMetadataWithAddress(
     cell.address,
     cell.metadata,
@@ -873,7 +854,7 @@ const AsyncContractCell: React.FC<AsyncContractCellProps> = ({ cell }) => {
   const contractTypeUrlSegment =
     cell.contractType === "custom" ? "" : `/${UrlMap[cell.contractType]}`;
 
-  const href = `/${wallet}/${getNetworkFromChainId(
+  const href = `/${getNetworkFromChainId(
     cell.chainId as SUPPORTED_CHAIN_ID,
   )}${contractTypeUrlSegment}/${cell.address}`;
 
@@ -920,7 +901,7 @@ const NoContracts: React.FC = () => {
           <LinkButton
             leftIcon={<FiPlus />}
             colorScheme="primary"
-            href="/contracts/new"
+            href="/contracts"
           >
             Deploy new contract
           </LinkButton>

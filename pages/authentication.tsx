@@ -10,8 +10,8 @@ import { ChakraNextImage } from "components/Image";
 import { AuthenticationCode } from "components/product-pages/authentication/AuthenticationCode";
 import { AuthenticationExamples } from "components/product-pages/authentication/AuthenticationExamples";
 import { HomepageSection } from "components/product-pages/common/Section";
+import { HomepageTopNav } from "components/product-pages/common/Topnav";
 import { HomepageFooter } from "components/product-pages/homepage/Footer";
-import { HomepageTopNav } from "components/product-pages/homepage/Topnav";
 import { GeneralCta } from "components/shared/GeneralCta";
 import { useTrack } from "hooks/analytics/useTrack";
 import { NextSeo } from "next-seo";
@@ -80,7 +80,7 @@ export default function Authentication() {
                   <GeneralCta
                     title="Get started"
                     size="lg"
-                    href="https://portal.thirdweb.com/building-web3-apps/authenticating-users"
+                    href="https://portal.thirdweb.com/auth"
                     w={{ base: "full", md: "inherit" }}
                   />
                 </LightMode>
@@ -337,7 +337,7 @@ export default function Authentication() {
               <LightMode>
                 <GeneralCta
                   size="lg"
-                  href="https://portal.thirdweb.com/building-web3-apps/authenticating-users"
+                  href="https://portal.thirdweb.com/auth"
                   w={{ base: "full", md: "inherit" }}
                 />
               </LightMode>

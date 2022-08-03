@@ -1,4 +1,4 @@
-import { useEnsName, useReleaserProfile, useResolvedEnsName } from "../hooks";
+import { ens, useReleaserProfile } from "../hooks";
 import { EditProfile } from "./edit-profile";
 import { MaskedAvatar } from "./masked-avatar";
 import { ReleaserSocials } from "./releaser-socials";
@@ -16,13 +16,13 @@ export const ReleaserHeader: React.FC<ReleaserHeaderProps> = ({
   wallet,
   page,
 }) => {
-  const resolvedAddress = useResolvedEnsName(wallet);
-  const releaserProfile = useReleaserProfile(resolvedAddress.data || undefined);
+  const ensQuery = ens.useQuery(wallet);
+  const releaserProfile = useReleaserProfile(
+    ensQuery.data?.address || undefined,
+  );
   const address = useAddress();
   const router = useRouter();
-  const isProfilePage = router.pathname === "/contracts/[wallet]";
-
-  const ensName = useEnsName(wallet);
+  const isProfilePage = router.pathname === "/[networkOrAddress]";
 
   return (
     <Flex
@@ -41,18 +41,17 @@ export const ReleaserHeader: React.FC<ReleaserHeaderProps> = ({
               src={
                 releaserProfile.data?.avatar ||
                 `https://source.boringavatars.com/marble/120/${
-                  ensName.data || wallet
+                  ensQuery.data?.ensName || wallet
                 }?colors=264653,2a9d8f,e9c46a,f4a261,e76f51&square=true`
               }
             />
           </Skeleton>
 
           <Flex flexDir="column">
-            <Link href={`/contracts/${ensName.data || wallet}`}>
+            <Link href={`/${ensQuery.data?.ensName || wallet}`}>
               <Heading size="subtitle.sm" ml={2}>
-                {/* TODO resolve ENS name */}
                 {releaserProfile?.data?.name ||
-                  ensName.data ||
+                  ensQuery.data?.ensName ||
                   shortenIfAddress(wallet)}
               </Heading>
             </Link>
@@ -67,12 +66,12 @@ export const ReleaserHeader: React.FC<ReleaserHeaderProps> = ({
           </Flex>
         </Flex>
         {!isProfilePage && (
-          <LinkButton variant="outline" size="sm" href={`/contracts/${wallet}`}>
+          <LinkButton variant="outline" size="sm" href={`/${wallet}`}>
             View all contracts
           </LinkButton>
         )}
       </Flex>
-      {resolvedAddress.data === address &&
+      {ensQuery.data?.address === address &&
         isProfilePage &&
         releaserProfile?.data && (
           <EditProfile releaserProfile={releaserProfile.data} />

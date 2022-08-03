@@ -36,7 +36,7 @@ import {
 } from "@thirdweb-dev/react";
 import { ChakraNextImage } from "components/Image";
 import { MismatchButton } from "components/buttons/MismatchButton";
-import { useEnsName } from "components/contract-components/hooks";
+import { ens } from "components/contract-components/hooks";
 import { SupportedNetworkSelect } from "components/selects/SupportedNetworkSelect";
 import { GNOSIS_TO_CHAIN_ID } from "constants/mappings";
 import { CustomSDKContext } from "contexts/custom-sdk-context";
@@ -121,7 +121,7 @@ export const ConnectWallet: React.FC<ButtonProps> = (buttonProps) => {
 
   const gnosisModalState = useDisclosure();
 
-  const ensName = useEnsName(address);
+  const ensQuery = ens.useQuery(address);
 
   if (address && chainId) {
     const SVG = getNetworkMetadata(chainId).icon;
@@ -131,7 +131,7 @@ export const ConnectWallet: React.FC<ButtonProps> = (buttonProps) => {
           isOpen={gnosisModalState.isOpen}
           onClose={gnosisModalState.onClose}
         />
-        <Menu matchWidth isLazy>
+        <Menu isLazy>
           <MenuButton
             as={Button}
             {...buttonProps}
@@ -149,7 +149,7 @@ export const ConnectWallet: React.FC<ButtonProps> = (buttonProps) => {
                   {getNetworkMetadata(chainId).symbol}
                 </Text>
                 <Text size="label.sm" color="gray.500">
-                  {shortenIfAddress(ensName.data || address, true)} (
+                  {shortenIfAddress(ensQuery.data?.ensName || address, true)} (
                   {getNetworkMetadata(chainId).chainName})
                 </Text>
               </Flex>
@@ -310,7 +310,7 @@ export const ConnectWallet: React.FC<ButtonProps> = (buttonProps) => {
   return (
     <>
       <MagicModal isOpen={isOpen} onClose={onClose} />
-      <Menu matchWidth isLazy>
+      <Menu isLazy>
         <MenuButton
           isLoading={connector.loading}
           as={Button}

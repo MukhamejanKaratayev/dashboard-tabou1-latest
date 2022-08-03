@@ -1,4 +1,4 @@
-import { useContractPrePublishMetadata, useResolvedEnsName } from "../../hooks";
+import { ens, useContractPrePublishMetadata } from "../../hooks";
 import { DeployableContractContractCellProps } from "../../types";
 import { Skeleton } from "@chakra-ui/react";
 import { useAddress } from "@thirdweb-dev/react";
@@ -10,13 +10,13 @@ export const ContractDescriptionCell: React.FC<
   DeployableContractContractCellProps
 > = ({ cell: { value } }) => {
   const address = useAddress();
-  const wallet = useSingleQueryParam("wallet");
+  const wallet = useSingleQueryParam("networkOrAddress");
 
-  const resolvedAddress = useResolvedEnsName(wallet);
+  const ensQuery = ens.useQuery(wallet);
 
   const fullPublishMetadata = useContractPrePublishMetadata(
     value,
-    resolvedAddress.data || wallet || address,
+    ensQuery.data?.address || wallet || address,
   );
 
   const description =

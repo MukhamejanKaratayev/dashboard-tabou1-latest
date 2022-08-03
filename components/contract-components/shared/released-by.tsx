@@ -1,6 +1,6 @@
 import { Flex } from "@chakra-ui/react";
 import {
-  useEnsName,
+  ens,
   useReleasesFromDeploy,
 } from "components/contract-components/hooks";
 import { LinkButton, Text } from "tw-components";
@@ -11,14 +11,14 @@ interface ReleasedByProps {
 }
 
 export const ReleasedBy: React.FC<ReleasedByProps> = ({ contractAddress }) => {
-  const releasesFromDeploy = useReleasesFromDeploy(contractAddress);
+  const ensQuery = ens.useQuery(contractAddress);
+  const releasesFromDeploy = useReleasesFromDeploy(
+    ensQuery.data?.address || undefined,
+  );
 
   const lastRelease = releasesFromDeploy?.data?.length
     ? releasesFromDeploy.data[releasesFromDeploy.data.length - 1]
     : undefined;
-
-  const ensName = useEnsName(lastRelease?.publisher);
-
   return lastRelease ? (
     <Flex flexDir="column" gap={3}>
       <LinkButton
@@ -29,7 +29,8 @@ export const ReleasedBy: React.FC<ReleasedByProps> = ({ contractAddress }) => {
         {lastRelease?.name} | {lastRelease?.version}
       </LinkButton>
       <Text size="label.sm" textAlign="center">
-        Released by {shortenIfAddress(ensName.data || lastRelease?.publisher)}
+        Released by{" "}
+        {shortenIfAddress(ensQuery.data?.ensName || lastRelease?.publisher)}
       </Text>
     </Flex>
   ) : null;

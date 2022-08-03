@@ -1,6 +1,7 @@
 import { Box, Flex, Image, Skeleton } from "@chakra-ui/react";
 import { useContractMetadata, useContractType } from "@thirdweb-dev/react";
 import { ChakraNextImage } from "components/Image";
+import { ens } from "components/contract-components/hooks";
 import { FeatureIconMap } from "constants/mappings";
 import { useMemo } from "react";
 import { AddressCopyButton, Heading, Text } from "tw-components";
@@ -12,8 +13,11 @@ interface ContractMetadataProps {
 export const ContractMetadata: React.FC<ContractMetadataProps> = ({
   contractAddress,
 }) => {
-  const metadataQuery = useContractMetadata(contractAddress);
-  const contractType = useContractType(contractAddress);
+  const ensQuery = ens.useQuery(contractAddress);
+  const metadataQuery = useContractMetadata(
+    ensQuery.data?.address || undefined,
+  );
+  const contractType = useContractType(ensQuery.data?.address || undefined);
 
   const contractTypeImage = useMemo(() => {
     return (

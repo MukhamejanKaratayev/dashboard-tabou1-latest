@@ -15,7 +15,7 @@ export default function ContractsDeployPage() {
 
   const ipfsHashes = useMemo(() => {
     const ipfs = router.query.ipfs;
-    return Array.isArray(ipfs) ? ipfs : [ipfs];
+    return Array.isArray(ipfs) ? ipfs : [ipfs || ""];
   }, [router.query]);
 
   return (
@@ -29,7 +29,7 @@ export default function ContractsDeployPage() {
             <Link
               color="primary.500"
               isExternal
-              href="https://portal.thirdweb.com/thirdweb-deploy/contract-extensions"
+              href="https://portal.thirdweb.com/deploy"
             >
               Learn more about deploying your contracts.
             </Link>
