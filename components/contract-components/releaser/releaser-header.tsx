@@ -4,6 +4,7 @@ import { MaskedAvatar } from "./masked-avatar";
 import { ReleaserSocials } from "./releaser-socials";
 import { Flex, Skeleton } from "@chakra-ui/react";
 import { useAddress } from "@thirdweb-dev/react";
+import { useTrack } from "hooks/analytics/useTrack";
 import { useRouter } from "next/router";
 import { Heading, Link, LinkButton, Text } from "tw-components";
 import { shortenIfAddress } from "utils/usedapp-external";
@@ -24,6 +25,8 @@ export const ReleaserHeader: React.FC<ReleaserHeaderProps> = ({
   const router = useRouter();
   const isProfilePage = router.pathname === "/[networkOrAddress]";
 
+  const trackEvent = useTrack();
+
   return (
     <Flex
       flexDirection={{ base: "column", md: page ? "column" : "row" }}
@@ -36,8 +39,7 @@ export const ReleaserHeader: React.FC<ReleaserHeaderProps> = ({
         <Flex gap={4} alignItems="center">
           <Skeleton isLoaded={releaserProfile.isSuccess}>
             <MaskedAvatar
-              boxSize={12}
-              mt={1}
+              boxSize={14}
               src={
                 releaserProfile.data?.avatar ||
                 `https://source.boringavatars.com/marble/120/${
@@ -48,7 +50,16 @@ export const ReleaserHeader: React.FC<ReleaserHeaderProps> = ({
           </Skeleton>
 
           <Flex flexDir="column">
-            <Link href={`/${ensQuery.data?.ensName || wallet}`}>
+            <Link
+              href={`/contracts/${ensQuery.data?.ensName || wallet}`}
+              onClick={() =>
+                trackEvent({
+                  category: "releaser-header",
+                  action: "click",
+                  label: "releaser-name",
+                })
+              }
+            >
               <Heading size="subtitle.sm" ml={2}>
                 {releaserProfile?.data?.name ||
                   ensQuery.data?.ensName ||
@@ -66,7 +77,18 @@ export const ReleaserHeader: React.FC<ReleaserHeaderProps> = ({
           </Flex>
         </Flex>
         {!isProfilePage && (
-          <LinkButton variant="outline" size="sm" href={`/${wallet}`}>
+          <LinkButton
+            variant="outline"
+            size="sm"
+            href={`/contracts/${wallet}`}
+            onClick={() =>
+              trackEvent({
+                category: "releaser-header",
+                action: "click",
+                label: "view-all-contracts",
+              })
+            }
+          >
             View all contracts
           </LinkButton>
         )}

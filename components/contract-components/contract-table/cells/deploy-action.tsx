@@ -21,7 +21,7 @@ export const ContractDeployActionCell: React.FC<
   const ensQuery = ens.useQuery(address);
   const wallet = useSingleQueryParam("networkOrAddress");
 
-  const { trackEvent } = useTrack();
+  const trackEvent = useTrack();
 
   const audit =
     BuiltinContractMap[value as keyof typeof BuiltinContractMap]?.audit;
@@ -40,8 +40,7 @@ export const ContractDeployActionCell: React.FC<
               label="audited"
               aria-label="Audited contract"
               colorScheme="green"
-              variant="outline"
-              borderWidth="2px"
+              variant="ghost"
               icon={<Icon as={BsShieldFillCheck} boxSize={4} />}
               onClick={() =>
                 trackEvent({

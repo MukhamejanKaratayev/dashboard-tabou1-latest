@@ -1,10 +1,6 @@
-import { useTableContext } from "../table-context";
-import {
-  useAirdropMutation,
-  useContractTypeOfContract,
-} from "@3rdweb-sdk/react";
 import { Flex, Icon, Stack, useDisclosure } from "@chakra-ui/react";
-import { ValidContractInstance } from "@thirdweb-dev/sdk";
+import { useAddress, useAirdropNFT } from "@thirdweb-dev/react";
+import { Erc1155 } from "@thirdweb-dev/sdk";
 import {
   AirdropAddressInput,
   AirdropUpload,
@@ -16,18 +12,18 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { BsCircleFill } from "react-icons/bs";
 import { FiUpload } from "react-icons/fi";
-import { IoMdSend } from "react-icons/io";
 import { Button, Text } from "tw-components";
 
-interface IAirdropSection {
-  contract?: ValidContractInstance;
+interface AirdropTabProps {
+  contract: Erc1155;
   tokenId: string;
 }
 
-export const AirdropSection: React.FC<IAirdropSection> = ({
+export const AirdropTab: React.FC<AirdropTabProps> = ({
   contract,
   tokenId,
 }) => {
+  const address = useAddress();
   const { handleSubmit, setValue, watch } = useForm<{
     addresses: AirdropAddressInput[];
   }>({
@@ -37,8 +33,7 @@ export const AirdropSection: React.FC<IAirdropSection> = ({
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const airdrop = useAirdropMutation(contract);
-  const { closeAllRows } = useTableContext();
+  const airdrop = useAirdropNFT(contract);
 
   const { onSuccess, onError } = useTxNotifications(
     "Airdrop successful",
@@ -47,18 +42,16 @@ export const AirdropSection: React.FC<IAirdropSection> = ({
 
   const addresses = watch("addresses");
 
-  const categoryName = useContractTypeOfContract(contract) || "unknown-airdrop";
-
   return (
     <Stack pt={3}>
       <form
         onSubmit={handleSubmit((data) => {
           trackEvent({
-            category: categoryName,
+            category: "airdrop",
             action: "airdrop",
             label: "attempt",
             contractAddress: contract?.getAddress(),
-            tokenId,
+            token_id: tokenId,
           });
           airdrop.mutate(
             {
@@ -69,21 +62,20 @@ export const AirdropSection: React.FC<IAirdropSection> = ({
               onSuccess: () => {
                 onSuccess();
                 trackEvent({
-                  category: categoryName,
+                  category: "airdrop",
                   action: "airdrop",
                   label: "success",
-                  contractAddress: contract?.getAddress(),
-                  tokenId,
+                  contract_address: contract?.getAddress(),
+                  token_id: tokenId,
                 });
-                closeAllRows();
               },
               onError: (error) => {
                 trackEvent({
-                  category: categoryName,
+                  category: "airdrop",
                   action: "airdrop",
-                  label: "error",
-                  contractAddress: contract?.getAddress(),
-                  tokenId,
+                  label: "success",
+                  contract_address: contract?.getAddress(),
+                  token_id: tokenId,
                   error,
                 });
                 onError(error);
@@ -92,12 +84,11 @@ export const AirdropSection: React.FC<IAirdropSection> = ({
           );
         })}
       >
-        <Stack align="center">
+        <Stack>
           <Stack
             spacing={6}
             w="100%"
             direction={{ base: "column", md: "row" }}
-            justifyContent="center"
             mb={3}
           >
             <AirdropUpload
@@ -105,11 +96,7 @@ export const AirdropSection: React.FC<IAirdropSection> = ({
               onClose={onClose}
               setAirdrop={(value) => setValue(`addresses`, value)}
             />
-            <Flex
-              direction={{ base: "column", md: "row" }}
-              align="center"
-              gap={4}
-            >
+            <Flex direction={{ base: "column", md: "row" }} gap={4}>
               <Button
                 colorScheme="primary"
                 borderRadius="md"
@@ -143,8 +130,8 @@ export const AirdropSection: React.FC<IAirdropSection> = ({
             isLoading={airdrop.isLoading}
             type="submit"
             colorScheme="primary"
-            disabled={addresses.length === 0}
-            rightIcon={<Icon as={IoMdSend} />}
+            disabled={!!address && addresses.length === 0}
+            alignSelf="flex-end"
           >
             Airdrop
           </TransactionButton>
