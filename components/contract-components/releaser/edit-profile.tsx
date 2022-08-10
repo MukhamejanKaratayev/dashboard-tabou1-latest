@@ -15,10 +15,10 @@ import { FileInput } from "components/shared/FileInput";
 import { useTrack } from "hooks/analytics/useTrack";
 import { useImageFileOrUrl } from "hooks/useImageFileOrUrl";
 import { useTxNotifications } from "hooks/useTxNotifications";
-import { useEffect } from "react";
+import { useEffect, useId } from "react";
 import { useForm } from "react-hook-form";
 import { BiImage } from "react-icons/bi";
-import { FiGlobe } from "react-icons/fi";
+import { FiEdit, FiGlobe } from "react-icons/fi";
 import { HiPencilAlt } from "react-icons/hi";
 import { SiDiscord, SiGithub, SiTwitter } from "react-icons/si";
 import {
@@ -36,6 +36,7 @@ interface EditProfileProps {
 export const EditProfile: React.FC<EditProfileProps> = ({
   releaserProfile,
 }) => {
+  const FORM_ID = useId();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {
     register,
@@ -68,11 +69,17 @@ export const EditProfile: React.FC<EditProfileProps> = ({
 
   return (
     <>
-      <Button onClick={onOpen} size="sm">
+      <Button
+        onClick={onOpen}
+        size="sm"
+        variant="outline"
+        leftIcon={<Icon as={FiEdit} />}
+      >
         Edit Profile
       </Button>
 
       <form
+        id={FORM_ID}
         onSubmit={handleSubmit((d) => {
           trackEvent({
             category: "profile",
@@ -117,6 +124,7 @@ export const EditProfile: React.FC<EditProfileProps> = ({
                 colorScheme="blue"
                 type="submit"
                 isLoading={editProfile.isLoading}
+                form={FORM_ID}
               >
                 Save
               </TransactionButton>
@@ -126,6 +134,7 @@ export const EditProfile: React.FC<EditProfileProps> = ({
             gap: 6,
             display: "flex",
             flexDirection: "column",
+            overflowX: "hidden",
           }}
         >
           <FormControl isInvalid={!!errors.avatar}>
@@ -155,7 +164,7 @@ export const EditProfile: React.FC<EditProfileProps> = ({
               {errors?.avatar?.message as unknown as string}
             </FormErrorMessage>
           </FormControl>
-          <FormControl isInvalid={!!errors.bio} mr={4}>
+          <FormControl isInvalid={!!errors.bio}>
             <FormLabel>
               <Flex gap={2}>
                 <Icon as={HiPencilAlt} boxSize={4} />
@@ -169,7 +178,7 @@ export const EditProfile: React.FC<EditProfileProps> = ({
             />
             <FormErrorMessage>{errors?.bio?.message}</FormErrorMessage>
           </FormControl>
-          <FormControl isInvalid={!!errors.github} mr={4}>
+          <FormControl isInvalid={!!errors.github}>
             <FormLabel>
               <Flex gap={2}>
                 <Icon as={SiGithub} boxSize={4} />
@@ -182,7 +191,7 @@ export const EditProfile: React.FC<EditProfileProps> = ({
             />
             <FormErrorMessage>{errors?.github?.message}</FormErrorMessage>
           </FormControl>
-          <FormControl isInvalid={!!errors.twitter} mr={4}>
+          <FormControl isInvalid={!!errors.twitter}>
             <FormLabel>
               <Flex gap={2}>
                 <Icon as={SiTwitter} boxSize={4} />
@@ -195,7 +204,7 @@ export const EditProfile: React.FC<EditProfileProps> = ({
             />
             <FormErrorMessage>{errors?.twitter?.message}</FormErrorMessage>
           </FormControl>
-          <FormControl isInvalid={!!errors.website} mr={4}>
+          <FormControl isInvalid={!!errors.website}>
             <FormLabel>
               <Flex gap={2}>
                 <Icon as={FiGlobe} boxSize={4} />
@@ -208,7 +217,7 @@ export const EditProfile: React.FC<EditProfileProps> = ({
             />
             <FormErrorMessage>{errors?.website?.message}</FormErrorMessage>
           </FormControl>
-          <FormControl isInvalid={!!errors.discord} mr={4}>
+          <FormControl isInvalid={!!errors.discord}>
             <FormLabel>
               <Flex gap={2}>
                 <Icon as={SiDiscord} boxSize={4} />

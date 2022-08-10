@@ -35,6 +35,7 @@ import {
   FormErrorMessage,
   FormLabel,
   Heading,
+  LinkButton,
   Text,
 } from "tw-components";
 import { shortenIfAddress } from "utils/usedapp-external";
@@ -95,6 +96,27 @@ export const ContractReleaseForm: React.FC<ContractReleaseFormProps> = ({
   }, [prePublishMetadata.data, address, placeholderVersion, isDirty]);
 
   const ensQuery = ens.useQuery(address);
+
+  const successRedirectUrl = useMemo(() => {
+    if (
+      (!ensQuery.data?.ensName && !ensQuery.data?.address) ||
+      !publishMetadata.data?.name
+    ) {
+      return undefined;
+    }
+    return `/contracts/${ensQuery.data.ensName || ensQuery.data.address}/${
+      publishMetadata.data.name
+    }`;
+  }, [
+    ensQuery.data?.address,
+    ensQuery.data?.ensName,
+    publishMetadata.data?.name,
+  ]);
+
+  const isDisabled = !successRedirectUrl || !address;
+
+  // during loading and after success we should stay in loading state
+  const isLoading = publishMutation.isLoading || publishMutation.isSuccess;
   return (
     <Card w="100%" p={{ base: 6, md: 10 }}>
       <Flex
@@ -121,14 +143,15 @@ export const ContractReleaseForm: React.FC<ContractReleaseFormProps> = ({
                   label: "success",
                   uris: contractId,
                 });
-                router.push(
-                  `/contracts/${ensQuery.data?.ensName || address}/${
-                    publishMetadata.data?.name
-                  }`,
-                  undefined,
-                  // reset scroll after redirect
-                  { scroll: true },
-                );
+                if (successRedirectUrl) {
+                  router.push(
+                    successRedirectUrl,
+                    undefined,
+                    // reset scroll after redirect
+                    // shallow render (aka do not wait for SSR)
+                    { scroll: true, shallow: true },
+                  );
+                }
               },
               onError: (err) => {
                 onError(err);
@@ -152,29 +175,34 @@ export const ContractReleaseForm: React.FC<ContractReleaseFormProps> = ({
               boxSize={14}
               alt=""
             />
-            <Skeleton isLoaded={publishMetadata.isSuccess}>
-              <Flex direction="column">
+
+            <Flex direction="column">
+              <Skeleton
+                isLoaded={
+                  publishMetadata.isSuccess && !!publishMetadata.data.name
+                }
+              >
                 <Heading minW="60px" size="title.md" fontWeight="bold">
-                  {publishMetadata.data?.name}
+                  {publishMetadata.data?.name || "Placeholder"}
                 </Heading>
-                {address ? (
-                  <Text size="body.md" py={1}>
-                    Releasing as{" "}
-                    <strong>
-                      {shortenIfAddress(ensQuery.data?.ensName || address)}
-                    </strong>
-                  </Text>
-                ) : (
-                  <Text size="body.md" py={1}>
-                    Connect your wallet to create a release for this contract
-                  </Text>
-                )}
-              </Flex>
-            </Skeleton>
+              </Skeleton>
+              {address ? (
+                <Text size="body.md" py={1}>
+                  Releasing as{" "}
+                  <strong>
+                    {shortenIfAddress(ensQuery.data?.ensName || address)}
+                  </strong>
+                </Text>
+              ) : (
+                <Text size="body.md" py={1}>
+                  Connect your wallet to create a release for this contract
+                </Text>
+              )}
+            </Flex>
           </Flex>
           <FormControl isInvalid={!!errors.Description}>
             <FormLabel>Description</FormLabel>
-            <Input {...register("description")} disabled={!address} />
+            <Input {...register("description")} disabled={isDisabled} />
             <FormErrorMessage>{errors?.description?.message}</FormErrorMessage>
           </FormControl>
 
@@ -198,7 +226,7 @@ export const ContractReleaseForm: React.FC<ContractReleaseFormProps> = ({
                 <TabPanel px={0} pb={0}>
                   <Textarea
                     {...register("readme")}
-                    disabled={!address}
+                    disabled={isDisabled}
                     rows={12}
                   />
                   <FormErrorMessage>{errors?.readme?.message}</FormErrorMessage>
@@ -224,7 +252,7 @@ export const ContractReleaseForm: React.FC<ContractReleaseFormProps> = ({
             <Input
               {...register("version")}
               placeholder={placeholderVersion}
-              disabled={!address}
+              disabled={isDisabled}
             />
             <FormErrorMessage>{errors?.version?.message}</FormErrorMessage>
           </FormControl>
@@ -246,7 +274,7 @@ export const ContractReleaseForm: React.FC<ContractReleaseFormProps> = ({
               </TabList>
               <TabPanels pt={2}>
                 <TabPanel px={0} pb={0}>
-                  <Textarea {...register("changelog")} disabled={!address} />
+                  <Textarea {...register("changelog")} disabled={isDisabled} />
                   <FormErrorMessage>
                     {errors?.changelog?.message}
                   </FormErrorMessage>
@@ -261,13 +289,27 @@ export const ContractReleaseForm: React.FC<ContractReleaseFormProps> = ({
           </FormControl>
           <Flex justifyContent="space-between" alignItems="center">
             <Text>
-              Our contract registry lives on Polygon and releases are free
-              (gasless)
+              Our contract registry lives on-chain (Polygon), releasing is free
+              (gasless).{" "}
+              <LinkButton
+                size="sm"
+                variant="outline"
+                href="https://portal.thirdweb.com/release"
+                isExternal
+              >
+                Learn more
+              </LinkButton>
             </Text>
             <TransactionButton
               colorScheme={address ? "purple" : "blue"}
               transactionCount={1}
-              isLoading={publishMutation.isLoading}
+              isDisabled={isDisabled}
+              isLoading={isLoading}
+              loadingText={
+                publishMutation.isSuccess
+                  ? "Preparing page"
+                  : "Releasing contract"
+              }
               type="submit"
             >
               Create Release
