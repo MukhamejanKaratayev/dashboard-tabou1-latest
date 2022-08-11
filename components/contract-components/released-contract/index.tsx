@@ -3,6 +3,7 @@ import {
   useContractEnabledExtensions,
   useContractPublishMetadataFromURI,
   useReleasedContractCompilerMetadata,
+  useReleasedContractEvents,
   useReleasedContractFunctions,
   useReleasedContractInfo,
   useReleaserProfile,
@@ -76,6 +77,7 @@ export const ReleasedContract: React.FC<ReleasedContractProps> = ({
   const currentRoute = `https://thirdweb.com${router.asPath}`;
 
   const contractFunctions = useReleasedContractFunctions(release);
+  const contractEvents = useReleasedContractEvents(release);
 
   // const { onCopy, hasCopied } = useClipboard(currentRoute);
 
@@ -205,6 +207,7 @@ Deploy it in one click`,
           {contractFunctions && (
             <ContractFunctionsOverview
               functions={contractFunctions}
+              events={contractEvents}
               sources={sources.data}
             />
           )}
@@ -220,8 +223,13 @@ Deploy it in one click`,
               <ListItem>
                 <Flex gap={2} alignItems="center">
                   <Icon as={IoDocumentOutline} boxSize={5} />
-                  <Text size="label.md">
-                    License: {compilerInfo?.licenses?.join(", ") || "None"}
+                  <Text size="label.md" lineHeight={1.2}>
+                    License
+                    {compilerInfo?.licenses &&
+                    compilerInfo?.licenses?.length > 1
+                      ? "s"
+                      : ""}
+                    : {compilerInfo?.licenses?.join(", ") || "None"}
                   </Text>
                 </Flex>
               </ListItem>
