@@ -111,7 +111,7 @@ export async function fetchContractPublishMetadataFromURI(
     info: removeUndefinedFromObject(resolved.info),
     licenses: resolved.licenses,
     compilerMetadata: resolved.metadata,
-    analytics: resolved.analytics,
+    analytics: removeUndefinedFromObject(resolved.analytics),
   };
 }
 
@@ -417,9 +417,7 @@ export function useCustomContractDeployMutation(ipfsHash: string) {
         sdk && "getPublisher" in sdk,
         "sdk is not ready or does not support publishing",
       );
-      return await (
-        await sdk.getPublisher()
-      ).deployContract(
+      return await sdk.deployer.deployContractFromUri(
         ipfsHash.startsWith("ipfs://") ? ipfsHash : `ipfs://${ipfsHash}`,
         data.constructorParams,
       );
