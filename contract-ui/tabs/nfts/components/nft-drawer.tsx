@@ -1,4 +1,6 @@
 import { AirdropTab } from "./airdrop-tab";
+import { BurnTab } from "./burn-tab";
+import { MintSupplyTab } from "./mint-supply-tab";
 import { TransferTab } from "./transfer-tab";
 import {
   Flex,
@@ -43,9 +45,6 @@ export const NFTDrawer: React.FC<NFTDrawerProps> = ({
     data?.metadata.id,
   );
 
-  const isERC1155 = contract instanceof Erc1155;
-  const isERC721 = contract instanceof Erc721;
-
   const prevData = usePrevious(data);
 
   const renderData = data || prevData;
@@ -53,9 +52,15 @@ export const NFTDrawer: React.FC<NFTDrawerProps> = ({
     return null;
   }
 
+  const isERC1155 = contract instanceof Erc1155;
+  const isERC721 = contract instanceof Erc721;
   const isOwner =
     (isERC1155 && BigNumber.from(balanceOf?.data || 0).gt(0)) ||
     (isERC721 && renderData.owner === address);
+
+  const isBurnable = detectBurnable(contract);
+  const isMintable = detectMintable(contract);
+  const isClaimable = detectClaimable(contract);
 
   return (
     <Drawer
@@ -98,10 +103,13 @@ export const NFTDrawer: React.FC<NFTDrawerProps> = ({
                   Airdrop
                 </Tab>
               )}
-              <Tab gap={2} isDisabled>
-                Burn 🚧
-              </Tab>
-              {isERC1155 && (
+              {isBurnable && (
+                <Tab gap={2} isDisabled={!isOwner}>
+                  Burn
+                </Tab>
+              )}
+              {isMintable && isERC1155 && <Tab gap={2}>Mint</Tab>}
+              {isClaimable && isERC1155 && (
                 <Tab gap={2} isDisabled>
                   Claim Phases 🚧
                 </Tab>
@@ -132,15 +140,31 @@ export const NFTDrawer: React.FC<NFTDrawerProps> = ({
                   tokenId={renderData.metadata.id.toString()}
                 />
               </TabPanel>
-              <TabPanel>
-                {isERC1155 && contract instanceof Erc1155 && (
+              {isERC1155 && (
+                <TabPanel>
                   <AirdropTab
                     contract={contract}
                     tokenId={renderData.metadata.id.toString()}
                   />
-                )}
-              </TabPanel>
-              <TabPanel>Burn</TabPanel>
+                </TabPanel>
+              )}
+              {isBurnable && (
+                <TabPanel>
+                  <BurnTab
+                    contract={contract}
+                    tokenId={renderData.metadata.id.toString()}
+                  />
+                </TabPanel>
+              )}
+              {isMintable && isERC1155 && (
+                <TabPanel>
+                  <MintSupplyTab
+                    contract={contract}
+                    tokenId={renderData.metadata.id.toString()}
+                  />
+                </TabPanel>
+              )}
+              {isClaimable && isERC1155 && <TabPanel>Claim Phases</TabPanel>}
             </TabPanels>
           </Tabs>
         </Card>
@@ -148,3 +172,33 @@ export const NFTDrawer: React.FC<NFTDrawerProps> = ({
     </Drawer>
   );
 };
+
+export function detectBurnable(contract?: NFTContract) {
+  if (!contract) {
+    return undefined;
+  }
+  if ("burn" in contract) {
+    return !!contract?.burn;
+  }
+  return undefined;
+}
+
+export function detectMintable(contract?: NFTContract) {
+  if (!contract) {
+    return undefined;
+  }
+  if ("mint" in contract) {
+    return !!contract?.mint;
+  }
+  return undefined;
+}
+
+export function detectClaimable(contract?: NFTContract) {
+  if (!contract) {
+    return undefined;
+  }
+  if ("drop" in contract) {
+    return !!contract?.drop;
+  }
+  return undefined;
+}
