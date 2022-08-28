@@ -508,7 +508,7 @@ const LearnMoreSection: React.FC = () => {
                   }}
                   bgClip="text"
                 >
-                  pre-built contracts
+                  prebuilt contracts
                 </Heading>
               </Heading>
             </LinkOverlay>
