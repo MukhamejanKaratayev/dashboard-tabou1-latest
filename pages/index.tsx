@@ -97,12 +97,12 @@ const HomePage: ThirdwebNextPage = () => {
               <Flex direction="column">
                 <LightMode>
                   <Flex
-                    direction={{ base: "column", md: "row" }}
+                    direction={{ base: "column", lg: "row" }}
                     align="center"
                     gap={6}
                   >
                     <LinkButton
-                      href="/contracts"
+                      href="/dashboard"
                       onClick={() =>
                         trackEvent({
                           category: "cta-button",
@@ -133,7 +133,7 @@ const HomePage: ThirdwebNextPage = () => {
                       pr="14px"
                       borderRadius="md"
                       h="68px"
-                      minW={{ base: "100%", md: "290px" }}
+                      minW={{ base: "100%", lg: "240px" }}
                       gap={4}
                       align="center"
                     >
@@ -350,7 +350,7 @@ const HomePage: ThirdwebNextPage = () => {
                       <>
                         Add features such as{" "}
                         <TrackedLink
-                          href="https://portal.thirdweb.com/contracts-sdk/contract-extensions/permissions"
+                          href="https://portal.thirdweb.com/extensions/features/permissions"
                           category="landing-contracts"
                           label="extension-permissions"
                           borderBottom="1px solid"
@@ -363,7 +363,7 @@ const HomePage: ThirdwebNextPage = () => {
                         </TrackedLink>
                         ,{" "}
                         <TrackedLink
-                          href="https://portal.thirdweb.com/contracts-sdk/contract-extensions/royalty"
+                          href="https://portal.thirdweb.com/extensions/features/royalty"
                           category="landing-contracts"
                           label="extension-royalties"
                           borderBottom="1px solid"
@@ -376,7 +376,7 @@ const HomePage: ThirdwebNextPage = () => {
                         </TrackedLink>
                         ,{" "}
                         <TrackedLink
-                          href="https://portal.thirdweb.com/contracts-sdk/contract-extensions/delayedreveal"
+                          href="https://portal.thirdweb.com/extensions/features/delayedreveal"
                           category="landing-contracts"
                           label="extension-delayed-reveal"
                           borderBottom="1px solid"

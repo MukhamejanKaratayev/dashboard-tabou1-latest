@@ -2,6 +2,7 @@ import { QuestionIcon } from "@chakra-ui/icons";
 import {
   Arbitrum,
   Avalanche,
+  BinanceCoin,
   Ethereum,
   Fantom,
   Optimism,
@@ -27,6 +28,8 @@ export const FAUCETS: Partial<Record<ChainId, string>> = {
   [ChainId.FantomTestnet]: "https://faucet.fantom.network/",
   [ChainId.OptimismTestnet]: "https://kovan.optifaucet.com/",
   [ChainId.ArbitrumTestnet]: "https://faucet.paradigm.xyz/",
+  [ChainId.BinanceSmartChainTestnet]:
+    "https://testnet.binance.org/faucet-smart",
 };
 
 const defaultNetworkMetadata: Record<SUPPORTED_CHAIN_ID, NetworkMetadata> = {
@@ -120,6 +123,20 @@ const defaultNetworkMetadata: Record<SUPPORTED_CHAIN_ID, NetworkMetadata> = {
     symbol: NATIVE_TOKENS[ChainId.ArbitrumTestnet].symbol,
     isTestnet: true,
     chainId: ChainId.ArbitrumTestnet,
+  },
+  [ChainId.BinanceSmartChainMainnet]: {
+    chainName: "Binance Smart Chain",
+    icon: BinanceCoin,
+    symbol: NATIVE_TOKENS[ChainId.BinanceSmartChainMainnet].symbol,
+    isTestnet: false,
+    chainId: ChainId.BinanceSmartChainMainnet,
+  },
+  [ChainId.BinanceSmartChainTestnet]: {
+    chainName: "Binance Smart Chain Testnet",
+    icon: BinanceCoin,
+    symbol: NATIVE_TOKENS[ChainId.BinanceSmartChainTestnet].symbol,
+    isTestnet: true,
+    chainId: ChainId.BinanceSmartChainTestnet,
   },
 };
 
