@@ -5,6 +5,7 @@ import {
   Flex,
   FormControl,
   Icon,
+  IconButton,
   Input,
   Menu,
   MenuButton,
@@ -22,6 +23,8 @@ import {
   useClipboard,
   useDisclosure,
 } from "@chakra-ui/react";
+import { AiOutlineDisconnect } from "@react-icons/all-files/ai/AiOutlineDisconnect";
+import { GiWavyChains } from "@react-icons/all-files/gi/GiWavyChains";
 import {
   ChainId,
   useAddress,
@@ -46,9 +49,7 @@ import { StaticImageData } from "next/image";
 import posthog from "posthog-js";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { AiOutlineDisconnect } from "react-icons/ai";
-import { FiCheck, FiCopy } from "react-icons/fi";
-import { GiWavyChains } from "react-icons/gi";
+import { FiCheck, FiCopy, FiUser } from "react-icons/fi";
 import {
   Badge,
   Button,
@@ -58,6 +59,7 @@ import {
   FormHelperText,
   FormLabel,
   Heading,
+  LinkButton,
   MenuGroup,
   MenuItem,
   Text,
@@ -179,19 +181,30 @@ export const ConnectWallet: React.FC<ButtonProps> = (buttonProps) => {
           <MenuList borderRadius="lg" py={2}>
             <MenuGroup
               title={
-                <>
-                  Personal Wallet{" "}
-                  {!isGnosisConnectorConnected && (
-                    <Badge
-                      colorScheme="green"
-                      marginStart={1}
-                      variant="subtle"
-                      size="label.sm"
-                    >
-                      connected
-                    </Badge>
-                  )}
-                </>
+                <Flex justifyContent="space-between" alignItems="center">
+                  <Flex gap={2}>
+                    Personal Wallet{" "}
+                    {!isGnosisConnectorConnected && (
+                      <Badge
+                        colorScheme="green"
+                        marginStart={1}
+                        variant="subtle"
+                        size="label.sm"
+                      >
+                        connected
+                      </Badge>
+                    )}
+                  </Flex>
+                  <MenuItem w="auto" p={0} m={0}>
+                    <IconButton
+                      as={LinkButton}
+                      size="xs"
+                      icon={<Icon as={FiUser} />}
+                      href={`/${address}`}
+                      aria-label="Visit profile"
+                    />
+                  </MenuItem>
+                </Flex>
               }
             >
               {!isGnosisConnectorConnected && (
