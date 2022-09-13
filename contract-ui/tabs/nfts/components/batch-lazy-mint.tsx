@@ -1,8 +1,9 @@
+import { BatchTable } from "./batch-table";
 import { SelectReveal } from "./select-reveal";
+import { UploadStep } from "./upload-step";
 import { Box, Container, Flex, HStack, Icon } from "@chakra-ui/react";
-import { NFTContract, useTotalCount } from "@thirdweb-dev/react";
-import { BatchTable } from "components/batch-upload/BatchTable";
-import { UploadStep } from "components/batch-upload/UploadStep";
+import { useTotalCount } from "@thirdweb-dev/react";
+import { SmartContract } from "@thirdweb-dev/sdk";
 import { BigNumber } from "ethers";
 import Papa from "papaparse";
 import { useCallback, useRef, useState } from "react";
@@ -17,7 +18,7 @@ import {
 } from "utils/batch";
 
 interface BatchLazyMintProps {
-  contract: NFTContract;
+  contract: SmartContract | null;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -76,7 +77,8 @@ export const BatchLazyMint: React.FC<BatchLazyMintProps> = ({
             setCSVData(validResults);
           },
         });
-      } else if (json?.length > 0) {
+        // we know this array will always exist, but it might be empty
+      } else if (json.length > 0) {
         setJsonData(json);
       } else {
         console.error("No CSV or JSON found");
