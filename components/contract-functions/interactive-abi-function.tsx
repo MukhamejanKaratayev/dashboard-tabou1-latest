@@ -8,8 +8,8 @@ import {
   Input,
   Textarea,
 } from "@chakra-ui/react";
-import { useContractCall } from "@thirdweb-dev/react";
-import { AbiFunction, SmartContract } from "@thirdweb-dev/sdk";
+import { useContractWrite } from "@thirdweb-dev/react";
+import { AbiFunction, ValidContractInstance } from "@thirdweb-dev/sdk";
 import { TransactionButton } from "components/buttons/TransactionButton";
 import { BigNumber, utils } from "ethers";
 import { useEffect, useId, useMemo } from "react";
@@ -25,7 +25,7 @@ import {
   Text,
 } from "tw-components";
 
-function formatResponseData(data: unknown): string {
+export function formatResponseData(data: unknown): string {
   if (BigNumber.isBigNumber(data)) {
     data = data.toString();
   }
@@ -87,7 +87,7 @@ function formatHint(type: string, components?: FunctionComponents): string {
     .replaceAll("}", " }");
 }
 
-function formatError(error: Error): string {
+export function formatError(error: Error): string {
   if (error.message) {
     return error.message.split("| Raw error |\n")[0].trim();
   }
@@ -126,7 +126,7 @@ function formatContractCall(params: unknown[], value?: BigNumber) {
 
 interface InteractiveAbiFunctionProps {
   abiFunction?: AbiFunction;
-  contract: SmartContract;
+  contract: ValidContractInstance;
 }
 
 export const InteractiveAbiFunction: React.FC<InteractiveAbiFunctionProps> = ({
@@ -163,13 +163,17 @@ export const InteractiveAbiFunction: React.FC<InteractiveAbiFunctionProps> = ({
     data,
     error,
     isLoading: mutationLoading,
-  } = useContractCall(contract, abiFunction?.name);
+  } = useContractWrite(contract, abiFunction?.name);
 
   useEffect(() => {
-    if (watch("params").length === 0) {
+    if (
+      watch("params").length === 0 &&
+      (abiFunction?.stateMutability === "view" ||
+        abiFunction?.stateMutability === "pure")
+    ) {
       mutate([]);
     }
-  }, [mutate, watch]);
+  }, [mutate, watch, abiFunction?.stateMutability]);
 
   return (
     <Card

@@ -20,12 +20,16 @@ import {
 } from "@chakra-ui/react";
 import { SiTwitter } from "@react-icons/all-files/si/SiTwitter";
 import { useQuery } from "@tanstack/react-query";
+import { useAddress } from "@thirdweb-dev/react";
 import {
   PublishedContract,
   PublishedMetadata,
   fetchSourceFilesFromMetadata,
 } from "@thirdweb-dev/sdk";
-import { StorageSingleton } from "components/app-layouts/providers";
+import {
+  StorageSingleton,
+  replaceIpfsUrl,
+} from "components/app-layouts/providers";
 import { ContractFunctionsOverview } from "components/contract-functions/contract-functions";
 import { ShareButton } from "components/share-buttom";
 import { format } from "date-fns";
@@ -70,6 +74,7 @@ export const ReleasedContract: React.FC<ReleasedContractProps> = ({
   release,
   walletOrEns,
 }) => {
+  const address = useAddress();
   const releasedContractInfo = useReleasedContractInfo(release);
   const { data: compilerInfo } = useReleasedContractCompilerMetadata(release);
 
@@ -196,17 +201,9 @@ Deploy it in one click`,
       />
       <GridItem colSpan={{ base: 12, md: 9 }}>
         <Flex flexDir="column" gap={6}>
-          {contractFunctions && (
-            <ContractFunctionsOverview
-              functions={contractFunctions}
-              events={contractEvents}
-              sources={sources.data}
-              abi={contractReleaseMetadata.data?.abi}
-            />
-          )}
           {releasedContractInfo.data?.publishedMetadata?.readme && (
             <Card as={Flex} flexDir="column" gap={2} p={6} position="relative">
-              {ensQuery?.data?.address === release.releaser && (
+              {address === release.releaser && (
                 <TrackedIconButton
                   icon={<Icon as={BiPencil} />}
                   aria-label="Edit readme"
@@ -250,6 +247,14 @@ Deploy it in one click`,
               />
             </Card>
           )}
+          {contractFunctions && (
+            <ContractFunctionsOverview
+              functions={contractFunctions}
+              events={contractEvents}
+              sources={sources.data}
+              abi={contractReleaseMetadata.data?.abi}
+            />
+          )}
         </Flex>
       </GridItem>
       <GridItem colSpan={{ base: 12, md: 3 }}>
@@ -276,9 +281,8 @@ Deploy it in one click`,
                       <Icon as={BsShieldCheck} boxSize={5} color="green" />
                       <Text size="label.md">
                         <Link
-                          href={releasedContractInfo.data?.publishedMetadata?.audit.replace(
-                            "ipfs://",
-                            `${StorageSingleton.gatewayUrl}/`,
+                          href={replaceIpfsUrl(
+                            releasedContractInfo.data?.publishedMetadata?.audit,
                           )}
                           isExternal
                         >
