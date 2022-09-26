@@ -3,6 +3,7 @@
 const ContentSecurityPolicy = `
   default-src 'self';
   img-src * data: blob:;
+  media-src * data: blob:;
   object-src 'none';
   style-src 'self' 'unsafe-inline' fonts.googleapis.com unpkg.com;
   font-src 'self' fonts.gstatic.com;
@@ -119,7 +120,7 @@ const sentryWebpackPluginOptions = {
   // For all available options, see:
   // https://github.com/getsentry/sentry-webpack-plugin#options.
 
-  hideSourceMaps: true,
+  hideSourceMaps: false,
 };
 module.exports = withBundleAnalyzer(
   withSentryConfig(moduleExports, sentryWebpackPluginOptions),
